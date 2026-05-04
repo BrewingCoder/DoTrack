@@ -50,6 +50,7 @@ public sealed class DoTrackApiFactory : WebApplicationFactory<Program>, IAsyncLi
         await using var scope = Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DoTrackDbContext>();
         await db.AuditLogs.ExecuteDeleteAsync();
+        await db.OutboxMessages.ExecuteDeleteAsync();
         await db.MilestoneScope.ExecuteDeleteAsync();
         await db.Milestones.ExecuteDeleteAsync();
         await db.AcceptanceCriteria.ExecuteDeleteAsync();

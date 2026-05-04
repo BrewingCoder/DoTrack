@@ -1,4 +1,6 @@
+using System.Text.Json;
 using DoTrack.Application.WorkItems;
+using DoTrack.Domain.Outbox;
 using DoTrack.Domain.WorkItems;
 using DoTrack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,7 @@ public sealed class CreateWorkItemHandler(DoTrackDbContext db, TimeProvider time
 
         var number = project.AllocateNextWorkItemNumber();
 
+        var now = timeProvider.GetUtcNow();
         var workItem = new WorkItem(
             WorkItemId.New(),
             project.Id,
@@ -27,9 +30,36 @@ public sealed class CreateWorkItemHandler(DoTrackDbContext db, TimeProvider time
             command.ReporterId,
             command.AssigneeId,
             command.EstimatePoints,
-            timeProvider.GetUtcNow());
+            now);
 
         db.WorkItems.Add(workItem);
+
+        // Emit issue.created automation event into the outbox. Same transaction as
+        // the WorkItem insert + Project sequence bump — at-least-once delivery
+        // semantics from the OutboxDispatcherService background worker.
+        var payload = new Dictionary<string, object?>
+        {
+            ["workItemId"] = workItem.Id.Value,
+            ["projectKey"] = project.Key,
+            ["number"] = number,
+            ["key"] = $"{project.Key}-{number}",
+            ["tier"] = workItem.Tier.ToString(),
+            ["type"] = workItem.Type?.ToString(),
+            ["title"] = workItem.Title,
+            ["state"] = workItem.State.ToString(),
+            ["reporterId"] = workItem.ReporterId.Value,
+            ["assigneeId"] = workItem.AssigneeId?.Value,
+            ["estimatePoints"] = workItem.EstimatePoints,
+            ["createdAt"] = workItem.CreatedAt
+        };
+        var outbox = new OutboxMessage(
+            OutboxMessageId.New(),
+            eventType: "issue.created",
+            payloadJson: JsonSerializer.Serialize(payload),
+            projectKey: project.Key,
+            now);
+        db.OutboxMessages.Add(outbox);
+
         await db.SaveChangesAsync(cancellationToken);
 
         return new CreateWorkItemResult(workItem.Id, number);

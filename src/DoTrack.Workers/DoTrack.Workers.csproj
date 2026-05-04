@@ -2,5 +2,9 @@
   <ItemGroup>
     <ProjectReference Include="..\DoTrack.Application\DoTrack.Application.csproj" />
     <ProjectReference Include="..\DoTrack.Infrastructure\DoTrack.Infrastructure.csproj" />
+    <ProjectReference Include="..\DoTrack.Automation.Abstractions\DoTrack.Automation.Abstractions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
 </Project>
