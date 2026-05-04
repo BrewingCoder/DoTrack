@@ -12,6 +12,7 @@ public static class WorkItemEndpoints
 
         group.MapPost("/", CreateAsync);
         group.MapGet("/{number:int}", GetAsync);
+        group.MapPatch("/{number:int}", PatchAsync);
 
         return routes;
     }
@@ -87,5 +88,50 @@ public static class WorkItemEndpoints
         }
 
         return Results.Ok(WorkItemContractMapper.ToResponse(workItem, project.ProjectKey));
+    }
+
+    private static async Task<IResult> PatchAsync(
+        string wsSlug,
+        string projKey,
+        int number,
+        UpdateWorkItemRequest? body,
+        IProjectResolver projectResolver,
+        IGetWorkItemHandler getHandler,
+        IUpdateWorkItemHandler updateHandler,
+        CancellationToken cancellationToken)
+    {
+        var validationErrors = UpdateWorkItemRequestValidator.Validate(body);
+        if (validationErrors is not null)
+        {
+            return Results.ValidationProblem(validationErrors);
+        }
+
+        var project = await projectResolver.ResolveAsync(wsSlug, projKey, cancellationToken);
+        if (project is null)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Project not found",
+                detail: $"No project '{projKey}' in workspace '{wsSlug}'.");
+        }
+
+        var existing = await getHandler.HandleAsync(
+            new GetWorkItemQuery(project.ProjectId, number),
+            cancellationToken);
+        if (existing is null)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Work item not found",
+                detail: $"{projKey}-{number} does not exist.");
+        }
+
+        var command = WorkItemContractMapper.ToCommand(body!, existing.Id);
+        await updateHandler.HandleAsync(command, cancellationToken);
+
+        var updated = await getHandler.HandleAsync(
+            new GetWorkItemQuery(project.ProjectId, number),
+            cancellationToken);
+        return Results.Ok(WorkItemContractMapper.ToResponse(updated!, project.ProjectKey));
     }
 }

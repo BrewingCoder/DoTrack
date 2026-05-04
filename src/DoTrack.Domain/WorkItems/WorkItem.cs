@@ -77,4 +77,50 @@ public sealed class WorkItem
         CreatedAt = now;
         UpdatedAt = now;
     }
+
+    public void UpdateTitle(string title, DateTimeOffset now)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentException("Title cannot be empty.", nameof(title));
+        }
+        Title = title;
+        UpdatedAt = now;
+    }
+
+    public void UpdateDescription(string? description, DateTimeOffset now)
+    {
+        Description = description;
+        UpdatedAt = now;
+    }
+
+    public void Assign(UserId assigneeId, DateTimeOffset now)
+    {
+        AssigneeId = assigneeId;
+        UpdatedAt = now;
+    }
+
+    public void Unassign(DateTimeOffset now)
+    {
+        AssigneeId = null;
+        UpdatedAt = now;
+    }
+
+    public void SetEstimate(int? points, DateTimeOffset now)
+    {
+        if (points is < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(points), "Estimate must be non-negative.");
+        }
+        EstimatePoints = points;
+        UpdatedAt = now;
+    }
+
+    public void TransitionState(WorkItemState newState, DateTimeOffset now)
+    {
+        // v0: free-form transitions; state-machine rules (legal transitions per type/project)
+        // are deferred to v1 when the configurable workflow ships.
+        State = newState;
+        UpdatedAt = now;
+    }
 }

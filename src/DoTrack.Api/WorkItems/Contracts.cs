@@ -11,6 +11,16 @@ public sealed record CreateWorkItemRequest(
     Guid? AssigneeId,
     int? EstimatePoints);
 
+// PATCH semantics: null/missing means "no change." Once a work item is
+// assigned, it cannot be unassigned via this endpoint; same for clearing
+// description. A future v0.1 endpoint will add explicit clear/unassign.
+public sealed record UpdateWorkItemRequest(
+    string? Title,
+    string? Description,
+    Guid? AssigneeId,
+    int? EstimatePoints,
+    WorkItemState? State);
+
 public sealed record WorkItemResponse(
     string Key,
     int Number,

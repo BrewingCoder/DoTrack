@@ -17,6 +17,14 @@ public static class WorkItemContractMapper
         request.AssigneeId is { } assignee ? new UserId(assignee) : null,
         request.EstimatePoints);
 
+    public static UpdateWorkItemCommand ToCommand(UpdateWorkItemRequest request, WorkItemId workItemId) => new(
+        workItemId,
+        request.Title,
+        request.Description,
+        request.AssigneeId is { } assignee ? new UserId(assignee) : null,
+        request.EstimatePoints,
+        request.State);
+
     public static WorkItemResponse ToResponse(WorkItem workItem, string projectKey) => new(
         Key: $"{projectKey}-{workItem.Number}",
         Number: workItem.Number,

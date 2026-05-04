@@ -8,7 +8,8 @@ using Shouldly;
 
 namespace DoTrack.Integration.Tests.WorkItems;
 
-public sealed class WorkItemEndpointsTests : IClassFixture<DoTrackApiFactory>, IAsyncLifetime
+[Collection(nameof(IntegrationCollection))]
+public sealed class WorkItemEndpointsTests : IAsyncLifetime
 {
     private readonly DoTrackApiFactory _factory;
     private readonly HttpClient _client;
