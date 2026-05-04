@@ -1,4 +1,5 @@
 using DoTrack.Api.Configuration;
+using DoTrack.Api.Middleware;
 using DoTrack.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<AuditContextMiddleware>();
 
 app.MapGet("/healthz", () => Results.Ok(new { status = "ok" }));
 

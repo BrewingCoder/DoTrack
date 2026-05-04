@@ -1,3 +1,5 @@
+using DoTrack.Domain.Auditing;
+
 namespace DoTrack.Domain.Identity;
 
 public readonly record struct UserId(Guid Value)
@@ -6,6 +8,7 @@ public readonly record struct UserId(Guid Value)
     public override string ToString() => Value.ToString();
 }
 
+[NotAudited]
 public sealed class User
 {
     public UserId Id { get; private set; }
