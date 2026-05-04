@@ -1,12 +1,19 @@
 name: CI
 
+# Temporarily reduced to manual-dispatch only until self-hosted runners
+# are wired up. To re-enable automatic runs, restore the push + pull_request
+# triggers below and switch `runs-on` to the appropriate runner label.
+#
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
+    # TODO: switch to self-hosted runner label once private runners are up.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
