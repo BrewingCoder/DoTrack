@@ -58,7 +58,10 @@ public sealed class WorkItem
         WorkItemTier tier,
         WorkItemType? type,
         string title,
+        string? description,
         UserId reporterId,
+        UserId? assigneeId,
+        int? estimatePoints,
         DateTimeOffset now)
     {
         Id = id;
@@ -67,7 +70,10 @@ public sealed class WorkItem
         Tier = tier;
         Type = type;
         Title = title;
+        Description = description;
         ReporterId = reporterId;
+        AssigneeId = assigneeId;
+        EstimatePoints = estimatePoints;
         CreatedAt = now;
         UpdatedAt = now;
     }

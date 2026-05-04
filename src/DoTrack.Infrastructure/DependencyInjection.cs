@@ -1,6 +1,8 @@
 using DoTrack.Application.Abstractions;
+using DoTrack.Application.WorkItems;
 using DoTrack.Infrastructure.Auditing;
 using DoTrack.Infrastructure.Persistence;
+using DoTrack.Infrastructure.WorkItems;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<IAuditContextAccessor, AmbientAuditContextAccessor>();
         services.TryAddDefaultCurrentUserAccessor();
         services.AddScoped<AuditingInterceptor>();
+        services.AddScoped<ICreateWorkItemHandler, CreateWorkItemHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {

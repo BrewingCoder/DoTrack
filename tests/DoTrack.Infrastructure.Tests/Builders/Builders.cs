@@ -72,7 +72,10 @@ public static class WorkItemBuilder
         WorkItemTier tier = WorkItemTier.Item,
         WorkItemType? type = WorkItemType.Task,
         int number = 1,
-        string? title = null)
+        string? title = null,
+        string? description = null,
+        UserId? assigneeId = null,
+        int? estimatePoints = null)
     {
         var faker = new Faker();
         return new WorkItem(
@@ -82,7 +85,10 @@ public static class WorkItemBuilder
             tier,
             tier == WorkItemTier.Item ? (type ?? WorkItemType.Task) : null,
             title ?? faker.Hacker.Phrase(),
+            description,
             reporterId,
+            assigneeId,
+            estimatePoints,
             DateTimeOffset.UtcNow);
     }
 }
