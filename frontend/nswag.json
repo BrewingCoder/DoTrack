@@ -1,0 +1,22 @@
+{
+  "runtime": "Net90",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "http://localhost:5259/openapi/v1.json"
+    }
+  },
+  "codeGenerators": {
+    "openApiToTypeScriptClient": {
+      "template": "Fetch",
+      "typeStyle": "Interface",
+      "enumStyle": "StringLiteral",
+      "dateTimeType": "string",
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "operationGenerationMode": "MultipleClientsFromFirstTagAndOperationId",
+      "markOptionalProperties": true,
+      "exceptionClass": "ApiException",
+      "output": "src/api/generated.ts"
+    }
+  }
+}
