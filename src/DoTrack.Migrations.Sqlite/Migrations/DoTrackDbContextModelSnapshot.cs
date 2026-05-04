@@ -174,6 +174,47 @@ namespace DoTrack.Migrations.Sqlite.Migrations
                     b.ToTable("time_entries", (string)null);
                 });
 
+            modelBuilder.Entity("DoTrack.Domain.WorkItems.AcceptanceCriterion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("CheckedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CheckedByUserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("WorkItemId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CheckedByUserId");
+
+                    b.HasIndex("WorkItemId");
+
+                    b.ToTable("acceptance_criteria", (string)null);
+                });
+
             modelBuilder.Entity("DoTrack.Domain.WorkItems.WorkItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -341,6 +382,20 @@ namespace DoTrack.Migrations.Sqlite.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("DoTrack.Domain.WorkItems.WorkItem", null)
+                        .WithMany()
+                        .HasForeignKey("WorkItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DoTrack.Domain.WorkItems.AcceptanceCriterion", b =>
+                {
+                    b.HasOne("DoTrack.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("CheckedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("DoTrack.Domain.WorkItems.WorkItem", null)
                         .WithMany()

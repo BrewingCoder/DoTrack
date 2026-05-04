@@ -1,9 +1,11 @@
+using DoTrack.Application.AcceptanceCriteria;
 using DoTrack.Application.Abstractions;
 using DoTrack.Application.Auditing;
 using DoTrack.Application.Comments;
 using DoTrack.Application.Time;
 using DoTrack.Application.WorkItems;
 using DoTrack.Application.Workspaces;
+using DoTrack.Infrastructure.AcceptanceCriteria;
 using DoTrack.Infrastructure.Auditing;
 using DoTrack.Infrastructure.Comments;
 using DoTrack.Infrastructure.Persistence;
@@ -35,6 +37,9 @@ public static class DependencyInjection
         services.AddScoped<ILogTimeHandler, LogTimeHandler>();
         services.AddScoped<IListTimeEntriesHandler, ListTimeEntriesHandler>();
         services.AddScoped<IGetEntityHistoryHandler, GetEntityHistoryHandler>();
+        services.AddScoped<IAddCriterionHandler, AddCriterionHandler>();
+        services.AddScoped<IUpdateCriterionStatusHandler, UpdateCriterionStatusHandler>();
+        services.AddScoped<IListCriteriaHandler, ListCriteriaHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {

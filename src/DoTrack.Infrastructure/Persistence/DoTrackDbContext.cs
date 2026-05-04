@@ -18,6 +18,7 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
     public DbSet<WorkItemHierarchy> WorkItemHierarchies => Set<WorkItemHierarchy>();
     public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
     public DbSet<Comment> Comments => Set<Comment>();
+    public DbSet<AcceptanceCriterion> AcceptanceCriteria => Set<AcceptanceCriterion>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,6 +34,7 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
         configurationBuilder.Properties<WorkItemId>().HaveConversion<WorkItemIdConverter>();
         configurationBuilder.Properties<TimeEntryId>().HaveConversion<TimeEntryIdConverter>();
         configurationBuilder.Properties<CommentId>().HaveConversion<CommentIdConverter>();
+        configurationBuilder.Properties<AcceptanceCriterionId>().HaveConversion<AcceptanceCriterionIdConverter>();
         configurationBuilder.Properties<AuditLogId>().HaveConversion<AuditLogIdConverter>();
     }
 
@@ -42,5 +44,6 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
     private sealed class WorkItemIdConverter() : ValueConverter<WorkItemId, Guid>(id => id.Value, v => new WorkItemId(v));
     private sealed class TimeEntryIdConverter() : ValueConverter<TimeEntryId, Guid>(id => id.Value, v => new TimeEntryId(v));
     private sealed class CommentIdConverter() : ValueConverter<CommentId, Guid>(id => id.Value, v => new CommentId(v));
+    private sealed class AcceptanceCriterionIdConverter() : ValueConverter<AcceptanceCriterionId, Guid>(id => id.Value, v => new AcceptanceCriterionId(v));
     private sealed class AuditLogIdConverter() : ValueConverter<AuditLogId, Guid>(id => id.Value, v => new AuditLogId(v));
 }

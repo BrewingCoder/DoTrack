@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using DoTrack.Api.AcceptanceCriteria;
 using DoTrack.Api.Auditing;
 using DoTrack.Api.Comments;
 using DoTrack.Api.Configuration;
@@ -45,6 +46,7 @@ app.MapGet("/healthz/db", async (DoTrackDbContext db, CancellationToken ct) =>
 app.MapWorkItemEndpoints();
 app.MapCommentEndpoints();
 app.MapTimeEntryEndpoints();
+app.MapAcceptanceCriteriaEndpoints();
 app.MapAuditEndpoints();
 app.MapGitHubWebhookEndpoint();
 
