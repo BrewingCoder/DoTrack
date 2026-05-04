@@ -1168,6 +1168,11 @@ export interface IWorkItemsClient {
     /**
      * @return OK
      */
+    workItemsAll(wsSlug: string, projKey: string): Promise<WorkItemResponse[]>;
+
+    /**
+     * @return OK
+     */
     workItemsGET(wsSlug: string, projKey: string, number: number): Promise<void>;
 
     /**
@@ -1240,6 +1245,48 @@ export class WorkItemsClient implements IWorkItemsClient {
             });
         }
         return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    workItemsAll(wsSlug: string, projKey: string): Promise<WorkItemResponse[]> {
+        let url_ = this.baseUrl + "/api/v1/workspaces/{wsSlug}/projects/{projKey}/work-items";
+        if (wsSlug === undefined || wsSlug === null)
+            throw new globalThis.Error("The parameter 'wsSlug' must be defined.");
+        url_ = url_.replace("{wsSlug}", encodeURIComponent("" + wsSlug));
+        if (projKey === undefined || projKey === null)
+            throw new globalThis.Error("The parameter 'projKey' must be defined.");
+        url_ = url_.replace("{projKey}", encodeURIComponent("" + projKey));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processWorkItemsAll(_response);
+        });
+    }
+
+    protected processWorkItemsAll(response: Response): Promise<WorkItemResponse[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as WorkItemResponse[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<WorkItemResponse[]>(null as any);
     }
 
     /**
@@ -2737,7 +2784,7 @@ export interface UpdateWorkItemRequest {
     description: string | undefined;
     assigneeId: string | undefined;
     estimatePoints: number | undefined;
-    state: State3 | undefined;
+    state: WorkItemState | undefined;
 
     [key: string]: any;
 }
@@ -2749,6 +2796,25 @@ export interface WatchRequest {
 }
 
 export type WorkItemLinkType = "Blocks" | "Duplicates" | "Causes" | "Relates";
+
+export interface WorkItemResponse {
+    key: string;
+    number: number;
+    id: string;
+    projectId: string;
+    tier: WorkItemTier;
+    type: Type2 | undefined;
+    state: WorkItemState;
+    title: string;
+    description: string | undefined;
+    reporterId: string;
+    assigneeId: string | undefined;
+    estimatePoints: number | undefined;
+    createdAt: string;
+    updatedAt: string;
+
+    [key: string]: any;
+}
 
 export type WorkItemState = "Open" | "InProgress" | "AwaitingClientReview" | "Accepted";
 
@@ -2780,7 +2846,7 @@ export interface State2 {
     [key: string]: any;
 }
 
-export interface State3 {
+export interface Type2 {
 
     [key: string]: any;
 }

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { projectsClient, workspacesClient } from '@/lib/api'
+import { Link, useParams } from '@tanstack/react-router'
+import { projectsClient } from '@/lib/api'
 import {
   Table,
   TableBody,
@@ -11,35 +12,19 @@ import {
 } from '@/components/ui/table'
 
 export function ProjectsPage() {
-  const workspacesQuery = useQuery({
-    queryKey: ['workspaces'],
-    queryFn: () => workspacesClient.workspacesAll(),
-  })
-
-  const firstWsSlug = workspacesQuery.data?.[0]?.slug
+  const { wsSlug } = useParams({ from: '/workspaces/$wsSlug/' })
 
   const projectsQuery = useQuery({
-    queryKey: ['projects', firstWsSlug],
-    queryFn: () => projectsClient.projectsAll(firstWsSlug!),
-    enabled: Boolean(firstWsSlug),
+    queryKey: ['projects', wsSlug],
+    queryFn: () => projectsClient.projectsAll(wsSlug),
   })
-
-  if (workspacesQuery.isLoading) {
-    return <Status>Loading workspaces…</Status>
-  }
-  if (workspacesQuery.isError) {
-    return <Status tone="error">Couldn't reach the API. Is it running on http://localhost:5259?</Status>
-  }
-  if (!firstWsSlug) {
-    return <Status>No workspaces yet. Create one via POST /api/v1/workspaces.</Status>
-  }
 
   return (
     <section className="p-8 max-w-4xl mx-auto space-y-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
         <p className="text-muted-foreground text-sm">
-          Workspace: <code className="font-mono">{firstWsSlug}</code>
+          Workspace: <code className="font-mono">{wsSlug}</code>
         </p>
       </header>
 
@@ -73,7 +58,15 @@ export function ProjectsPage() {
           )}
           {projectsQuery.data?.map((p) => (
             <TableRow key={p.id}>
-              <TableCell className="font-mono">{p.key}</TableCell>
+              <TableCell className="font-mono">
+                <Link
+                  to="/workspaces/$wsSlug/projects/$projKey/items"
+                  params={{ wsSlug, projKey: p.key }}
+                  className="hover:underline"
+                >
+                  {p.key}
+                </Link>
+              </TableCell>
               <TableCell className="font-medium">{p.name}</TableCell>
               <TableCell className="text-muted-foreground">{p.description ?? '—'}</TableCell>
               <TableCell className="text-right tabular-nums">{p.nextWorkItemNumber}</TableCell>
@@ -89,13 +82,5 @@ export function ProjectsPage() {
         </TableBody>
       </Table>
     </section>
-  )
-}
-
-function Status({ children, tone }: { children: React.ReactNode; tone?: 'error' }) {
-  return (
-    <main className="min-h-svh flex items-center justify-center p-8">
-      <p className={tone === 'error' ? 'text-destructive' : 'text-muted-foreground'}>{children}</p>
-    </main>
   )
 }
