@@ -12,7 +12,10 @@ internal sealed class WorkItemHierarchyConfiguration : IEntityTypeConfiguration<
         b.HasKey(x => new { x.AncestorId, x.DescendantId });
         b.Property(x => x.Depth).IsRequired();
         b.HasIndex(x => x.DescendantId);
-        b.HasOne<WorkItem>().WithMany().HasForeignKey(x => x.AncestorId).OnDelete(DeleteBehavior.Cascade);
-        b.HasOne<WorkItem>().WithMany().HasForeignKey(x => x.DescendantId).OnDelete(DeleteBehavior.Cascade);
+        // Both FKs are NoAction because SQL Server rejects multiple cascade paths to the same table.
+        // Closure-table cleanup is the app's responsibility: when deleting a WorkItem, app code must
+        // explicitly remove rows where it appears as ancestor OR descendant before the WorkItem delete.
+        b.HasOne<WorkItem>().WithMany().HasForeignKey(x => x.AncestorId).OnDelete(DeleteBehavior.NoAction);
+        b.HasOne<WorkItem>().WithMany().HasForeignKey(x => x.DescendantId).OnDelete(DeleteBehavior.NoAction);
     }
 }
