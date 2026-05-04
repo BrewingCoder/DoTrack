@@ -17,6 +17,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevFrontend", policy =>
+        policy.WithOrigins("http://localhost:5273")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
 builder.Services.AddConfiguredDatabase(builder.Configuration);
 builder.Services.AddSingleton<DoTrack.GitProviders.GitHub.GitHubAdapter>();
 builder.Services.AddSingleton<DoTrack.GitProviders.Gitea.GiteaAdapter>();
@@ -49,6 +56,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "DoTrack API"));
+    app.UseCors("DevFrontend");
 }
 
 app.UseStatusCodePages();

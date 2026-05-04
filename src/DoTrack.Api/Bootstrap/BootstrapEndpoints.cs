@@ -20,11 +20,11 @@ public static class BootstrapEndpoints
     {
         var ws = routes.MapGroup("/api/v1/workspaces").WithTags("Workspaces");
         ws.MapPost("/", CreateWorkspaceAsync);
-        ws.MapGet("/", ListWorkspacesAsync);
+        ws.MapGet("/", ListWorkspacesAsync).Produces<List<WorkspaceResponse>>(StatusCodes.Status200OK);
 
         var proj = routes.MapGroup("/api/v1/workspaces/{wsSlug}/projects").WithTags("Projects");
         proj.MapPost("/", CreateProjectAsync);
-        proj.MapGet("/", ListProjectsAsync);
+        proj.MapGet("/", ListProjectsAsync).Produces<List<ProjectResponse>>(StatusCodes.Status200OK);
 
         var users = routes.MapGroup("/api/v1/users").WithTags("Users");
         users.MapPost("/", CreateUserAsync);
