@@ -13,6 +13,8 @@ public static class WorkItemEndpoints
         group.MapPost("/", CreateAsync);
         group.MapGet("/{number:int}", GetAsync);
         group.MapPatch("/{number:int}", PatchAsync);
+        group.MapPost("/{number:int}/parent", SetParentAsync);
+        group.MapDelete("/{number:int}/parent", RemoveParentAsync);
 
         return routes;
     }
@@ -133,5 +135,105 @@ public static class WorkItemEndpoints
             new GetWorkItemQuery(project.ProjectId, number),
             cancellationToken);
         return Results.Ok(WorkItemContractMapper.ToResponse(updated!, project.ProjectKey));
+    }
+
+    private static async Task<IResult> SetParentAsync(
+        string wsSlug,
+        string projKey,
+        int number,
+        SetParentRequest? body,
+        IProjectResolver projectResolver,
+        IGetWorkItemHandler getHandler,
+        ISetWorkItemParentHandler setParentHandler,
+        CancellationToken cancellationToken)
+    {
+        if (body is null)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["request"] = ["Request body is required."]
+            });
+        }
+
+        var project = await projectResolver.ResolveAsync(wsSlug, projKey, cancellationToken);
+        if (project is null)
+        {
+            return Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Project not found");
+        }
+
+        var child = await getHandler.HandleAsync(
+            new GetWorkItemQuery(project.ProjectId, number),
+            cancellationToken);
+        if (child is null)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Work item not found",
+                detail: $"{projKey}-{number} does not exist.");
+        }
+
+        var parentWsSlug = body.ParentWorkspaceSlug ?? wsSlug;
+        var parentProjKey = body.ParentProjectKey ?? projKey;
+        var parentScope = await projectResolver.ResolveAsync(parentWsSlug, parentProjKey, cancellationToken);
+        if (parentScope is null)
+        {
+            return Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Parent project not found");
+        }
+
+        var parent = await getHandler.HandleAsync(
+            new GetWorkItemQuery(parentScope.ProjectId, body.ParentNumber),
+            cancellationToken);
+        if (parent is null)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Parent work item not found",
+                detail: $"{parentProjKey}-{body.ParentNumber} does not exist.");
+        }
+
+        try
+        {
+            await setParentHandler.HandleAsync(
+                new SetWorkItemParentCommand(child.Id, parent.Id),
+                cancellationToken);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Invalid parent link",
+                detail: ex.Message);
+        }
+
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> RemoveParentAsync(
+        string wsSlug,
+        string projKey,
+        int number,
+        IProjectResolver projectResolver,
+        IGetWorkItemHandler getHandler,
+        ISetWorkItemParentHandler setParentHandler,
+        CancellationToken cancellationToken)
+    {
+        var project = await projectResolver.ResolveAsync(wsSlug, projKey, cancellationToken);
+        if (project is null)
+        {
+            return Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Project not found");
+        }
+
+        var child = await getHandler.HandleAsync(
+            new GetWorkItemQuery(project.ProjectId, number),
+            cancellationToken);
+        if (child is null)
+        {
+            return Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Work item not found");
+        }
+
+        await setParentHandler.HandleAsync(
+            new SetWorkItemParentCommand(child.Id, null),
+            cancellationToken);
+        return Results.NoContent();
     }
 }

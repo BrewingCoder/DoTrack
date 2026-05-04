@@ -21,6 +21,14 @@ public sealed record UpdateWorkItemRequest(
     int? EstimatePoints,
     WorkItemState? State);
 
+// Body for POST /work-items/{n}/parent. The parent is identified by its
+// number within a project — same workspace+project by default, or specify
+// the cross-project Epic->Feature case via ParentProjectKey/ParentWorkspaceSlug.
+public sealed record SetParentRequest(
+    int ParentNumber,
+    string? ParentProjectKey,
+    string? ParentWorkspaceSlug);
+
 public sealed record WorkItemResponse(
     string Key,
     int Number,

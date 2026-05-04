@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<ICreateWorkItemHandler, CreateWorkItemHandler>();
         services.AddScoped<IGetWorkItemHandler, GetWorkItemHandler>();
         services.AddScoped<IUpdateWorkItemHandler, UpdateWorkItemHandler>();
+        services.AddScoped<ISetWorkItemParentHandler, SetWorkItemParentHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {
