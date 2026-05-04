@@ -4,14 +4,33 @@ A self-hosted, OSS issue tracker and project manager designed for small dev team
 
 > Looks like JIRA, weighs like Vikunja, treats clients as first-class participants without per-seat pricing.
 
-**Status:** v0 — scaffolding. Not yet usable.
+**Status:** v0 — backend API surface online. Frontend deferred until UX-reference rig (YouTrack) is populated and the design language settles.
 
 ## Stack
 
 - **Backend:** .NET 10 + EF Core (multi-provider: PostgreSQL / SQL Server / SQLite; MySQL deferred until Pomelo ships EF Core 10)
-- **Frontend:** React + shadcn/ui + Tailwind + TipTap + Vaul (PWA)
-- **Distribution:** Docker Compose, Helm chart, signed images on GHCR
+- **Frontend:** React + shadcn/ui + Tailwind + TipTap + Vaul (PWA) — *not yet started*
+- **Distribution:** Docker Compose at root for full stack; Helm chart later
 - **License:** Apache 2.0
+
+## What's in v0 (running on backend)
+
+| Area | Endpoints |
+|---|---|
+| Bootstrap | POST/GET workspaces, projects, users |
+| Work items | POST/GET/PATCH; PATCH transitions state; closure-table parent links; issue-link relations (Blocks/Duplicates/Causes/Relates); watchers; My Work feed |
+| Per-project sequencing | Monotonic per-project numbers (PROJ-42 style), backed by Project.NextWorkItemNumber with `[NotAudited]` so allocation doesn't audit-spam |
+| Acceptance criteria | Add/list/update status (Pending/Met/Waived) with required reason on waive |
+| Sprints | Project-scoped, work item assignment (Items only — Epics/Features rejected), sprint-deletion clears assignments |
+| Milestones | Cross-project scope membership with computed health (budgetPct, scopePct, healthGap, projectedTotal, projectedOverage) |
+| Comments | Internal vs external visibility, default list excludes internal |
+| Time entries | DCAA-aligned: positive duration, non-empty description, ≤24h per entry |
+| Audit log | Every domain change captured (User excluded — privacy posture). `[NotAudited]` property reservation lets us mark e.g. NextWorkItemNumber out of the diffs. History endpoint per work item. |
+| Saved queries | Personal/Project/Public scopes — query string stored verbatim, parser is a future phase |
+| Git integration | GitHubAdapter implements IGitProviderAdapter with HMAC-SHA256 signature verification + push/pull_request parsing. Webhook receiver dispatches smart-commit directives (#fixed, #resolved, #closed, #in-progress) to transition referenced work items, and adds auto-comments for every commit/PR linking to a key |
+| Automation outbox | Transactional outbox + background OutboxDispatcherService; N8nAutomationProvider posts JSON+HMAC to a configured webhook. Producers: issue.created, issue.state_changed, issue.assigned, issue.commented, time.logged |
+
+Multi-provider matrix proven by integration tests across Postgres / SQL Server (Rosetta) / SQLite Testcontainers fixtures. ~330 tests at the time of this README.
 
 ## Repository layout
 
@@ -19,17 +38,23 @@ A self-hosted, OSS issue tracker and project manager designed for small dev team
 src/
   DoTrack.Domain/                       Pure domain model, no deps
   DoTrack.Application/                  Use cases, ports
-  DoTrack.Infrastructure/               EF Core, queue, repos (provider-agnostic)
+  DoTrack.Infrastructure/               EF Core, audit interceptor, handlers, outbox emitter
   DoTrack.Migrations.{Postgres,SqlServer,Sqlite}/
-  DoTrack.QueryLanguage/                Recursive-descent parser → EF expression trees
+  DoTrack.QueryLanguage/                Reserved — parser ships in v0.x
   DoTrack.GitProviders.{Abstractions,GitHub,Gitea,Bitbucket}/
   DoTrack.Automation.{Abstractions,N8n}/
-  DoTrack.Workers/                      In-process IHostedService runners
+  DoTrack.Workers/                      OutboxDispatcherService (BackgroundService)
   DoTrack.Api/                          ASP.NET Core composition root
 tests/
   DoTrack.{Domain,Application,Infrastructure,QueryLanguage,GitProviders,Integration}.Tests/
 .dev/
-  youtrack-ref/                         Local YouTrack container (UX reference rig)
+  youtrack-ref/        Local YouTrack container (UX reference rig)
+  postgres-dev/        Local Postgres for migrations + dev runs
+  sqlserver-dev/       Local SQL Server (amd64 under Rosetta on AIRM5)
+docker/
+  docker-compose.yml   Production-like local stack (web + Postgres)
+.github/workflows/
+  ci.yml               Build + test on PR/push
 ```
 
 ## Build
@@ -39,3 +64,41 @@ dotnet restore
 dotnet build
 dotnet test
 ```
+
+## Run locally
+
+Start the dev databases:
+
+```sh
+docker compose -f .dev/postgres-dev/docker-compose.yml up -d
+```
+
+Run the API:
+
+```sh
+dotnet run --project src/DoTrack.Api --launch-profile http
+```
+
+The API listens on http://localhost:5259. Bootstrap with the API itself:
+
+```sh
+curl -X POST http://localhost:5259/api/v1/workspaces -H 'Content-Type: application/json' \
+  -d '{"name":"Acme","slug":"acme"}'
+curl -X POST http://localhost:5259/api/v1/workspaces/acme/projects -H 'Content-Type: application/json' \
+  -d '{"key":"PROJ","name":"First Project"}'
+curl -X POST http://localhost:5259/api/v1/users -H 'Content-Type: application/json' \
+  -d '{"email":"alice@example.com","displayName":"Alice"}'
+```
+
+OpenAPI document at `/openapi/v1.json` in development.
+
+## Configuration
+
+Required:
+- `Database:Provider` — `postgres` | `sqlserver` | `sqlite`
+- `Database:ConnectionString`
+
+Optional:
+- `Webhooks:GitHub:Secret` — HMAC verification on the GitHub webhook receiver
+- `Automation:N8n:WebhookUrl` — when set, the OutboxDispatcherService is registered and posts events here
+- `Automation:N8n:Secret` — HMAC for outbound n8n delivery

@@ -1,0 +1,39 @@
+name: dotrack
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dotrack
+      POSTGRES_PASSWORD: dotrack
+      POSTGRES_DB: dotrack
+    volumes:
+      - dotrack-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "dotrack", "-d", "dotrack"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_ENVIRONMENT: Production
+      Database__Provider: postgres
+      Database__ConnectionString: Host=postgres;Port=5432;Database=dotrack;Username=dotrack;Password=dotrack
+      # Webhooks__GitHub__Secret: set this when wiring a real GitHub webhook
+      # Automation__N8n__WebhookUrl: http://n8n:5678/webhook/dotrack
+      # Automation__N8n__Secret: ...
+
+volumes:
+  dotrack-pg-data:

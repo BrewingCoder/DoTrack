@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test (non-integration)
+        run: |
+          dotnet test tests/DoTrack.GitProviders.Tests --no-build --configuration Release \
+            --logger "trx;LogFilePrefix=gitproviders" \
+            --logger "console;verbosity=normal"
+
+      - name: Test (multi-provider integration)
+        # Postgres + SqlServer Testcontainers run inside the GitHub Actions runner.
+        # SqlServer pulls the amd64 image; on the linux/amd64 runner this is native.
+        run: |
+          dotnet test tests/DoTrack.Infrastructure.Tests --no-build --configuration Release \
+            --logger "trx;LogFilePrefix=infrastructure" \
+            --logger "console;verbosity=normal"
+
+      - name: Test (Api end-to-end via WebApplicationFactory)
+        run: |
+          dotnet test tests/DoTrack.Integration.Tests --no-build --configuration Release \
+            --logger "trx;LogFilePrefix=integration" \
+            --logger "console;verbosity=normal"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/TestResults/*.trx"
+          if-no-files-found: ignore
