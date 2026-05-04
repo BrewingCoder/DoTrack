@@ -24,7 +24,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
-builder.Services.AddConfiguredDatabase(builder.Configuration);
+builder.Services.AddConfiguredDatabase();
 builder.Services.AddSingleton<DoTrack.GitProviders.GitHub.GitHubAdapter>();
 builder.Services.AddSingleton<DoTrack.GitProviders.Gitea.GiteaAdapter>();
 builder.Services.AddSingleton<DoTrack.GitProviders.Bitbucket.BitbucketAdapter>();

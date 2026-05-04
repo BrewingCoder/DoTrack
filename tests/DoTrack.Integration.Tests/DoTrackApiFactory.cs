@@ -24,6 +24,22 @@ public sealed class DoTrackApiFactory : WebApplicationFactory<Program>, IAsyncLi
 
         await using var scope = Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DoTrackDbContext>();
+
+        // Regression guard. Until this was fixed, AddConfiguredDatabase read the connection
+        // string at registration time — before WebApplicationFactory.ConfigureAppConfiguration
+        // applied the testcontainer override. The DbContext silently bound to whatever
+        // appsettings.Development.json had, which is the developer's dev rig DB.
+        // Every integration test would corrupt local dev data on a developer machine while
+        // looking like it ran against the testcontainer.
+        var actualConnection = db.Database.GetConnectionString();
+        if (actualConnection is null || !actualConnection.Contains("dotrack_integration", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"Integration test factory is bound to '{actualConnection}' instead of its testcontainer. " +
+                "Likely cause: AddConfiguredDatabase reverted to reading IConfiguration eagerly at registration time. " +
+                "It must read inside the AddDbContext factory delegate so ConfigureWebHost overrides are honored.");
+        }
+
         await db.Database.MigrateAsync();
     }
 

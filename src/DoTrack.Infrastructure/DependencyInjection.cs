@@ -32,7 +32,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddDoTrackInfrastructure(
         this IServiceCollection services,
-        Action<DbContextOptionsBuilder> configureDb)
+        Action<IServiceProvider, DbContextOptionsBuilder> configureDb)
     {
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<OutboxEmitter>();
@@ -89,7 +89,7 @@ public static class DependencyInjection
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {
-            configureDb(options);
+            configureDb(sp, options);
             options.AddInterceptors(sp.GetRequiredService<AuditingInterceptor>());
         });
 
