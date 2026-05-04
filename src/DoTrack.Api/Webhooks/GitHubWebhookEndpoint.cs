@@ -1,3 +1,4 @@
+using DoTrack.Application.Webhooks;
 using DoTrack.GitProviders.Abstractions;
 using DoTrack.GitProviders.GitHub;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ public static class GitHubWebhookEndpoint
         HttpContext httpContext,
         GitHubAdapter adapter,
         IConfiguration configuration,
+        IWebhookEventDispatcher dispatcher,
         ILogger<GitHubAdapter> logger,
         CancellationToken cancellationToken)
     {
@@ -45,14 +47,17 @@ public static class GitHubWebhookEndpoint
 
         var events = await adapter.ParseWebhookAsync(webhook, cancellationToken);
 
-        // v0: log + acknowledge. Full event dispatch (audit, comment-on-linked-issue,
-        // status transition via smart-commit commands) ships once we wire an outbox/dispatcher.
         foreach (var evt in events)
         {
             logger.LogInformation(
                 "GitHub webhook event: {ProviderId} {EventType} repo={Repo} occurredAt={OccurredAt}",
                 evt.ProviderId, evt.GetType().Name, evt.Repository, evt.OccurredAt);
         }
+
+        // Dispatch synchronously for v0 — comments, smart-commit transitions, etc.
+        // Future: persist to an outbox and dispatch from a background worker so that
+        // webhook ack-ing doesn't block on downstream work.
+        await dispatcher.DispatchAsync(events, cancellationToken);
 
         return Results.Accepted();
     }

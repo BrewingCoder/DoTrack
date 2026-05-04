@@ -7,6 +7,7 @@ using DoTrack.Application.Milestones;
 using DoTrack.Application.SavedQueries;
 using DoTrack.Application.Sprints;
 using DoTrack.Application.Time;
+using DoTrack.Application.Webhooks;
 using DoTrack.Application.WorkItems;
 using DoTrack.Application.Workspaces;
 using DoTrack.Infrastructure.AcceptanceCriteria;
@@ -18,6 +19,7 @@ using DoTrack.Infrastructure.Persistence;
 using DoTrack.Infrastructure.SavedQueries;
 using DoTrack.Infrastructure.Sprints;
 using DoTrack.Infrastructure.Time;
+using DoTrack.Infrastructure.Webhooks;
 using DoTrack.Infrastructure.WorkItems;
 using DoTrack.Infrastructure.Workspaces;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +77,8 @@ public static class DependencyInjection
         services.AddScoped<IUpdateSavedQueryHandler, UpdateSavedQueryHandler>();
         services.AddScoped<IDeleteSavedQueryHandler, DeleteSavedQueryHandler>();
         services.AddScoped<IListSavedQueriesHandler, ListSavedQueriesHandler>();
+        services.AddScoped<IFindByIssueKeyHandler, FindByIssueKeyHandler>();
+        services.AddScoped<IWebhookEventDispatcher, WebhookEventDispatcher>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {
