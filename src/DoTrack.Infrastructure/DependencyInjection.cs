@@ -1,10 +1,12 @@
 using DoTrack.Application.Abstractions;
 using DoTrack.Application.Comments;
+using DoTrack.Application.Time;
 using DoTrack.Application.WorkItems;
 using DoTrack.Application.Workspaces;
 using DoTrack.Infrastructure.Auditing;
 using DoTrack.Infrastructure.Comments;
 using DoTrack.Infrastructure.Persistence;
+using DoTrack.Infrastructure.Time;
 using DoTrack.Infrastructure.WorkItems;
 using DoTrack.Infrastructure.Workspaces;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +31,8 @@ public static class DependencyInjection
         services.AddScoped<ISetWorkItemParentHandler, SetWorkItemParentHandler>();
         services.AddScoped<IAddCommentHandler, AddCommentHandler>();
         services.AddScoped<IListCommentsHandler, ListCommentsHandler>();
+        services.AddScoped<ILogTimeHandler, LogTimeHandler>();
+        services.AddScoped<IListTimeEntriesHandler, ListTimeEntriesHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {
