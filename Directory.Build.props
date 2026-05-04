@@ -20,6 +20,11 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- xUnit1051 nudges every async assertion to thread TestContext.Current.CancellationToken;
+         opinionated, fires on every test, suppressed for v0 ergonomics.
+         CA1707 forbids underscores in member names — fights the Method_Scenario_Expected
+         test naming convention chosen for DoTrack. -->
+    <NoWarn>$(NoWarn);xUnit1051;CA1707;CA1711;CA1816</NoWarn>
   </PropertyGroup>
 
   <!-- EF Core scaffolds migration code that trips IDE0161 (file-scoped namespace)

@@ -2,6 +2,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\DoTrack.Infrastructure\DoTrack.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\DoTrack.Migrations.Postgres\DoTrack.Migrations.Postgres.csproj" />
+    <ProjectReference Include="..\..\src\DoTrack.Migrations.SqlServer\DoTrack.Migrations.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\DoTrack.Migrations.Sqlite\DoTrack.Migrations.Sqlite.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
@@ -12,6 +14,7 @@
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Bogus" />
     <PackageReference Include="Verify.XunitV3" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="Testcontainers.MsSql" />
   </ItemGroup>
