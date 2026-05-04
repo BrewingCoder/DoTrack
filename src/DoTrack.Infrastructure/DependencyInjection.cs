@@ -79,6 +79,10 @@ public static class DependencyInjection
         services.AddScoped<IListSavedQueriesHandler, ListSavedQueriesHandler>();
         services.AddScoped<IFindByIssueKeyHandler, FindByIssueKeyHandler>();
         services.AddScoped<IWebhookEventDispatcher, WebhookEventDispatcher>();
+        services.AddScoped<IWatchWorkItemHandler, WatchWorkItemHandler>();
+        services.AddScoped<IUnwatchWorkItemHandler, UnwatchWorkItemHandler>();
+        services.AddScoped<IListWatchersHandler, ListWatchersHandler>();
+        services.AddScoped<IMyWorkHandler, MyWorkHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {

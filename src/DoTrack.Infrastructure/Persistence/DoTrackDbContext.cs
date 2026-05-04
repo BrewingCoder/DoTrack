@@ -27,6 +27,7 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
     public DbSet<Milestone> Milestones => Set<Milestone>();
     public DbSet<MilestoneScope> MilestoneScope => Set<MilestoneScope>();
     public DbSet<WorkItemLink> WorkItemLinks => Set<WorkItemLink>();
+    public DbSet<WorkItemWatcher> WorkItemWatchers => Set<WorkItemWatcher>();
     public DbSet<SavedQuery> SavedQueries => Set<SavedQuery>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();

@@ -514,6 +514,24 @@ namespace DoTrack.Migrations.Sqlite.Migrations
                     b.ToTable("work_item_links", (string)null);
                 });
 
+            modelBuilder.Entity("DoTrack.Domain.WorkItems.WorkItemWatcher", b =>
+                {
+                    b.Property<Guid>("WorkItemId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("WorkItemId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("work_item_watchers", (string)null);
+                });
+
             modelBuilder.Entity("DoTrack.Domain.Workspaces.Project", b =>
                 {
                     b.Property<Guid>("Id")
@@ -723,6 +741,21 @@ namespace DoTrack.Migrations.Sqlite.Migrations
                         .WithMany()
                         .HasForeignKey("TargetId")
                         .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DoTrack.Domain.WorkItems.WorkItemWatcher", b =>
+                {
+                    b.HasOne("DoTrack.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoTrack.Domain.WorkItems.WorkItem", null)
+                        .WithMany()
+                        .HasForeignKey("WorkItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

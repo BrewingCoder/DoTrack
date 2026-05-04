@@ -66,6 +66,7 @@ app.MapGet("/healthz/db", async (DoTrackDbContext db, CancellationToken ct) =>
 app.MapBootstrapEndpoints();
 app.MapWorkItemEndpoints();
 app.MapWorkItemLinkEndpoints();
+app.MapWatcherEndpoints();
 app.MapCommentEndpoints();
 app.MapTimeEntryEndpoints();
 app.MapAcceptanceCriteriaEndpoints();
