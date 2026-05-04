@@ -3,6 +3,7 @@ using DoTrack.Api.Comments;
 using DoTrack.Api.Configuration;
 using DoTrack.Api.Middleware;
 using DoTrack.Api.Time;
+using DoTrack.Api.Webhooks;
 using DoTrack.Api.WorkItems;
 using DoTrack.Infrastructure.Persistence;
 
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddConfiguredDatabase(builder.Configuration);
+builder.Services.AddSingleton<DoTrack.GitProviders.GitHub.GitHubAdapter>();
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -42,6 +44,7 @@ app.MapGet("/healthz/db", async (DoTrackDbContext db, CancellationToken ct) =>
 app.MapWorkItemEndpoints();
 app.MapCommentEndpoints();
 app.MapTimeEntryEndpoints();
+app.MapGitHubWebhookEndpoint();
 
 app.Run();
 

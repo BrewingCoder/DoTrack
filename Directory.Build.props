@@ -14,6 +14,10 @@
     <Company>DoTrack</Company>
     <Product>DoTrack</Product>
     <Copyright>Copyright (c) DoTrack contributors</Copyright>
+    <!-- Logging-performance analyzers are valid in hot paths but noisy during dev.
+         CA1848 (use LoggerMessage delegates) and CA1873 (lazy log argument evaluation)
+         can be revisited when we tighten logging in v1. -->
+    <NoWarn>$(NoWarn);CA1848;CA1873</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">

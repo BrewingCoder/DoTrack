@@ -5,6 +5,7 @@
     <ProjectReference Include="..\DoTrack.Workers\DoTrack.Workers.csproj" />
     <ProjectReference Include="..\DoTrack.QueryLanguage\DoTrack.QueryLanguage.csproj" />
     <ProjectReference Include="..\DoTrack.GitProviders.GitHub\DoTrack.GitProviders.GitHub.csproj" />
+    <ProjectReference Include="..\DoTrack.GitProviders.Abstractions\DoTrack.GitProviders.Abstractions.csproj" />
     <ProjectReference Include="..\DoTrack.GitProviders.Gitea\DoTrack.GitProviders.Gitea.csproj" />
     <ProjectReference Include="..\DoTrack.GitProviders.Bitbucket\DoTrack.GitProviders.Bitbucket.csproj" />
     <ProjectReference Include="..\DoTrack.Automation.N8n\DoTrack.Automation.N8n.csproj" />
