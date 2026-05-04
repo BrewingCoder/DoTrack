@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using DoTrack.Api.AcceptanceCriteria;
 using DoTrack.Api.Auditing;
+using DoTrack.Api.Bootstrap;
 using DoTrack.Api.Comments;
 using DoTrack.Api.Configuration;
 using DoTrack.Api.Middleware;
@@ -44,6 +45,7 @@ app.MapGet("/healthz/db", async (DoTrackDbContext db, CancellationToken ct) =>
         : Results.Problem("Cannot connect to database", statusCode: 503);
 });
 
+app.MapBootstrapEndpoints();
 app.MapWorkItemEndpoints();
 app.MapCommentEndpoints();
 app.MapTimeEntryEndpoints();
