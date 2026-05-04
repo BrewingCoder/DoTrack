@@ -1,4 +1,5 @@
 using DoTrack.Application.Abstractions;
+using DoTrack.Application.Auditing;
 using DoTrack.Application.Comments;
 using DoTrack.Application.Time;
 using DoTrack.Application.WorkItems;
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IListCommentsHandler, ListCommentsHandler>();
         services.AddScoped<ILogTimeHandler, LogTimeHandler>();
         services.AddScoped<IListTimeEntriesHandler, ListTimeEntriesHandler>();
+        services.AddScoped<IGetEntityHistoryHandler, GetEntityHistoryHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {
