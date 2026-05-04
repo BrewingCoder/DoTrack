@@ -20,6 +20,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddConfiguredDatabase(builder.Configuration);
 builder.Services.AddSingleton<DoTrack.GitProviders.GitHub.GitHubAdapter>();
 builder.Services.AddSingleton<DoTrack.GitProviders.Gitea.GiteaAdapter>();
+builder.Services.AddSingleton<DoTrack.GitProviders.Bitbucket.BitbucketAdapter>();
 
 // Outbox + n8n outbound delivery. Wired only when n8n is configured.
 var n8nUrl = builder.Configuration["Automation:N8n:WebhookUrl"];
@@ -77,6 +78,7 @@ app.MapSavedQueryEndpoints();
 app.MapAuditEndpoints();
 app.MapGitHubWebhookEndpoint();
 app.MapGiteaWebhookEndpoint();
+app.MapBitbucketWebhookEndpoint();
 
 app.Run();
 
