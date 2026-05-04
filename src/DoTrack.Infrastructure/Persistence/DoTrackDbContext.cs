@@ -24,6 +24,7 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
     public DbSet<Sprint> Sprints => Set<Sprint>();
     public DbSet<Milestone> Milestones => Set<Milestone>();
     public DbSet<MilestoneScope> MilestoneScope => Set<MilestoneScope>();
+    public DbSet<WorkItemLink> WorkItemLinks => Set<WorkItemLink>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,6 +43,7 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
         configurationBuilder.Properties<AcceptanceCriterionId>().HaveConversion<AcceptanceCriterionIdConverter>();
         configurationBuilder.Properties<SprintId>().HaveConversion<SprintIdConverter>();
         configurationBuilder.Properties<MilestoneId>().HaveConversion<MilestoneIdConverter>();
+        configurationBuilder.Properties<WorkItemLinkId>().HaveConversion<WorkItemLinkIdConverter>();
         configurationBuilder.Properties<AuditLogId>().HaveConversion<AuditLogIdConverter>();
     }
 
@@ -54,5 +56,6 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
     private sealed class AcceptanceCriterionIdConverter() : ValueConverter<AcceptanceCriterionId, Guid>(id => id.Value, v => new AcceptanceCriterionId(v));
     private sealed class SprintIdConverter() : ValueConverter<SprintId, Guid>(id => id.Value, v => new SprintId(v));
     private sealed class MilestoneIdConverter() : ValueConverter<MilestoneId, Guid>(id => id.Value, v => new MilestoneId(v));
+    private sealed class WorkItemLinkIdConverter() : ValueConverter<WorkItemLinkId, Guid>(id => id.Value, v => new WorkItemLinkId(v));
     private sealed class AuditLogIdConverter() : ValueConverter<AuditLogId, Guid>(id => id.Value, v => new AuditLogId(v));
 }

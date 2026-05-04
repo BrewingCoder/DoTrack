@@ -38,6 +38,9 @@ public static class DependencyInjection
         services.AddScoped<IGetWorkItemHandler, GetWorkItemHandler>();
         services.AddScoped<IUpdateWorkItemHandler, UpdateWorkItemHandler>();
         services.AddScoped<ISetWorkItemParentHandler, SetWorkItemParentHandler>();
+        services.AddScoped<IAddWorkItemLinkHandler, AddWorkItemLinkHandler>();
+        services.AddScoped<IRemoveWorkItemLinkHandler, RemoveWorkItemLinkHandler>();
+        services.AddScoped<IListWorkItemLinksHandler, ListWorkItemLinksHandler>();
         services.AddScoped<IAddCommentHandler, AddCommentHandler>();
         services.AddScoped<IListCommentsHandler, ListCommentsHandler>();
         services.AddScoped<ILogTimeHandler, LogTimeHandler>();
