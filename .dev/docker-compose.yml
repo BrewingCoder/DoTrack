@@ -1,0 +1,26 @@
+name: dotrack
+
+# Umbrella compose for the day-to-day dev rig. Aggregates the per-service
+# composes via `include:` so everything comes up under a single `dotrack`
+# Docker project — one stack in Docker Desktop, one `docker compose` invocation.
+#
+# Each included file keeps its own bind-mount paths relative to its own
+# directory, so existing data on dev machines is preserved. Other dev machines
+# already running the fragmented composes (project names dotrack-pg-dev /
+# dotrack-yt-ref) don't need to switch — same container names, same volumes,
+# this just bundles them.
+#
+# SQL Server is intentionally excluded. Integration tests spin SQL Server up
+# via Testcontainers; ad-hoc poking can use .dev/sqlserver-dev/ directly.
+#
+# Usage:
+#   docker compose -f .dev/docker-compose.yml up -d
+#   docker compose -f .dev/docker-compose.yml down
+#
+# Don't run this alongside the fragmented composes on the same machine —
+# container names collide. `docker compose down` the fragments first if
+# switching layouts.
+
+include:
+  - postgres-dev/docker-compose.yml
+  - youtrack-ref/docker-compose.yml
