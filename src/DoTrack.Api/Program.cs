@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using DoTrack.Api.Comments;
 using DoTrack.Api.Configuration;
 using DoTrack.Api.Middleware;
 using DoTrack.Api.WorkItems;
@@ -38,6 +39,7 @@ app.MapGet("/healthz/db", async (DoTrackDbContext db, CancellationToken ct) =>
 });
 
 app.MapWorkItemEndpoints();
+app.MapCommentEndpoints();
 
 app.Run();
 

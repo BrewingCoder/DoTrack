@@ -1,7 +1,9 @@
 using DoTrack.Application.Abstractions;
+using DoTrack.Application.Comments;
 using DoTrack.Application.WorkItems;
 using DoTrack.Application.Workspaces;
 using DoTrack.Infrastructure.Auditing;
+using DoTrack.Infrastructure.Comments;
 using DoTrack.Infrastructure.Persistence;
 using DoTrack.Infrastructure.WorkItems;
 using DoTrack.Infrastructure.Workspaces;
@@ -25,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<IGetWorkItemHandler, GetWorkItemHandler>();
         services.AddScoped<IUpdateWorkItemHandler, UpdateWorkItemHandler>();
         services.AddScoped<ISetWorkItemParentHandler, SetWorkItemParentHandler>();
+        services.AddScoped<IAddCommentHandler, AddCommentHandler>();
+        services.AddScoped<IListCommentsHandler, ListCommentsHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {
