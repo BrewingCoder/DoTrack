@@ -353,4 +353,64 @@ public sealed class WorkItemEndpointsTests : IAsyncLifetime
         raw.Contains("\"Key\":", StringComparison.Ordinal).ShouldBeFalse();
         raw.Contains("\"ProjectId\":", StringComparison.Ordinal).ShouldBeFalse();
     }
+
+    [Fact]
+    public async Task Get_List_EmptyProject_ReturnsEmptyArray()
+    {
+        var (ws, project, _) = await _factory.SeedAsync();
+
+        var response = await _client.GetAsync($"/api/v1/workspaces/{ws.Slug}/projects/{project.Key}/work-items");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<WorkItemResponse[]>(ApiJsonOptions.Default);
+        body.ShouldNotBeNull();
+        body.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Get_List_AfterCreates_ReturnsAllOrderedByNumber()
+    {
+        var (ws, project, reporter) = await _factory.SeedAsync();
+        var url = $"/api/v1/workspaces/{ws.Slug}/projects/{project.Key}/work-items";
+
+        for (var i = 0; i < 3; i++)
+        {
+            var post = await _client.PostAsJsonAsync(url, new
+            {
+                tier = "Item",
+                type = "Task",
+                title = $"Task {i + 1}",
+                reporterId = reporter.Id.Value
+            }, ApiJsonOptions.Default);
+            post.StatusCode.ShouldBe(HttpStatusCode.Created);
+        }
+
+        var list = await _client.GetFromJsonAsync<WorkItemResponse[]>(url, ApiJsonOptions.Default);
+
+        list.ShouldNotBeNull();
+        list.Length.ShouldBe(3);
+        list.Select(w => w.Number).ShouldBe([1, 2, 3]);
+        list.Select(w => w.Title).ShouldBe(["Task 1", "Task 2", "Task 3"]);
+        list.ShouldAllBe(w => w.Key.StartsWith($"{project.Key}-"));
+    }
+
+    [Fact]
+    public async Task Get_List_UnknownProject_Returns404()
+    {
+        var (ws, _, _) = await _factory.SeedAsync();
+
+        var response = await _client.GetAsync($"/api/v1/workspaces/{ws.Slug}/projects/NOPE/work-items");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Get_List_UnknownWorkspace_Returns404()
+    {
+        var (_, project, _) = await _factory.SeedAsync();
+
+        var response = await _client.GetAsync($"/api/v1/workspaces/no-such-ws/projects/{project.Key}/work-items");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
 }

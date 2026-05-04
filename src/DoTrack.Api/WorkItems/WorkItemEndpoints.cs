@@ -11,12 +11,34 @@ public static class WorkItemEndpoints
             .WithTags("WorkItems");
 
         group.MapPost("/", CreateAsync);
+        group.MapGet("/", ListAsync).Produces<List<WorkItemResponse>>(StatusCodes.Status200OK);
         group.MapGet("/{number:int}", GetAsync);
         group.MapPatch("/{number:int}", PatchAsync);
         group.MapPost("/{number:int}/parent", SetParentAsync);
         group.MapDelete("/{number:int}/parent", RemoveParentAsync);
 
         return routes;
+    }
+
+    private static async Task<IResult> ListAsync(
+        string wsSlug,
+        string projKey,
+        IProjectResolver projectResolver,
+        IListWorkItemsForProjectHandler listHandler,
+        CancellationToken cancellationToken)
+    {
+        var project = await projectResolver.ResolveAsync(wsSlug, projKey, cancellationToken);
+        if (project is null)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Project not found",
+                detail: $"No project '{projKey}' in workspace '{wsSlug}'.");
+        }
+
+        var items = await listHandler.HandleAsync(new ListWorkItemsForProjectQuery(project.ProjectId), cancellationToken);
+        var responses = items.Select(w => WorkItemContractMapper.ToResponse(w, project.ProjectKey)).ToList();
+        return Results.Ok(responses);
     }
 
     private static async Task<IResult> CreateAsync(

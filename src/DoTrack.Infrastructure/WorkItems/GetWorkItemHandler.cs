@@ -17,3 +17,16 @@ public sealed class GetWorkItemHandler(DoTrackDbContext db) : IGetWorkItemHandle
                 cancellationToken);
     }
 }
+
+public sealed class ListWorkItemsForProjectHandler(DoTrackDbContext db) : IListWorkItemsForProjectHandler
+{
+    public async Task<IReadOnlyList<WorkItem>> HandleAsync(ListWorkItemsForProjectQuery query, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var rows = await db.WorkItems
+            .Where(w => w.ProjectId == query.ProjectId)
+            .ToListAsync(cancellationToken);
+        return rows.OrderBy(w => w.Number).ToList();
+    }
+}

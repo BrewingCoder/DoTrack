@@ -42,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IProjectResolver, ProjectResolver>();
         services.AddScoped<ICreateWorkItemHandler, CreateWorkItemHandler>();
         services.AddScoped<IGetWorkItemHandler, GetWorkItemHandler>();
+        services.AddScoped<IListWorkItemsForProjectHandler, ListWorkItemsForProjectHandler>();
         services.AddScoped<IUpdateWorkItemHandler, UpdateWorkItemHandler>();
         services.AddScoped<ISetWorkItemParentHandler, SetWorkItemParentHandler>();
         services.AddScoped<IAddWorkItemLinkHandler, AddWorkItemLinkHandler>();
