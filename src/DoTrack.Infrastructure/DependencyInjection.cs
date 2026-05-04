@@ -3,6 +3,7 @@ using DoTrack.Application.Abstractions;
 using DoTrack.Application.Auditing;
 using DoTrack.Application.Comments;
 using DoTrack.Application.Identity;
+using DoTrack.Application.Milestones;
 using DoTrack.Application.Sprints;
 using DoTrack.Application.Time;
 using DoTrack.Application.WorkItems;
@@ -11,6 +12,7 @@ using DoTrack.Infrastructure.AcceptanceCriteria;
 using DoTrack.Infrastructure.Auditing;
 using DoTrack.Infrastructure.Comments;
 using DoTrack.Infrastructure.Identity;
+using DoTrack.Infrastructure.Milestones;
 using DoTrack.Infrastructure.Persistence;
 using DoTrack.Infrastructure.Sprints;
 using DoTrack.Infrastructure.Time;
@@ -56,6 +58,14 @@ public static class DependencyInjection
         services.AddScoped<IListProjectsHandler, ListProjectsHandler>();
         services.AddScoped<ICreateUserHandler, CreateUserHandler>();
         services.AddScoped<IListUsersHandler, ListUsersHandler>();
+        services.AddScoped<ICreateMilestoneHandler, CreateMilestoneHandler>();
+        services.AddScoped<IUpdateMilestoneHandler, UpdateMilestoneHandler>();
+        services.AddScoped<IDeleteMilestoneHandler, DeleteMilestoneHandler>();
+        services.AddScoped<IListMilestonesHandler, ListMilestonesHandler>();
+        services.AddScoped<IAddScopeItemHandler, AddScopeItemHandler>();
+        services.AddScoped<IRemoveScopeItemHandler, RemoveScopeItemHandler>();
+        services.AddScoped<IGetMilestoneScopeHandler, GetMilestoneScopeHandler>();
+        services.AddScoped<IGetMilestoneHealthHandler, GetMilestoneHealthHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {

@@ -1,6 +1,7 @@
 using DoTrack.Domain.Auditing;
 using DoTrack.Domain.Comments;
 using DoTrack.Domain.Identity;
+using DoTrack.Domain.Milestones;
 using DoTrack.Domain.Sprints;
 using DoTrack.Domain.Time;
 using DoTrack.Domain.WorkItems;
@@ -21,6 +22,8 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<AcceptanceCriterion> AcceptanceCriteria => Set<AcceptanceCriterion>();
     public DbSet<Sprint> Sprints => Set<Sprint>();
+    public DbSet<Milestone> Milestones => Set<Milestone>();
+    public DbSet<MilestoneScope> MilestoneScope => Set<MilestoneScope>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,6 +41,7 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
         configurationBuilder.Properties<CommentId>().HaveConversion<CommentIdConverter>();
         configurationBuilder.Properties<AcceptanceCriterionId>().HaveConversion<AcceptanceCriterionIdConverter>();
         configurationBuilder.Properties<SprintId>().HaveConversion<SprintIdConverter>();
+        configurationBuilder.Properties<MilestoneId>().HaveConversion<MilestoneIdConverter>();
         configurationBuilder.Properties<AuditLogId>().HaveConversion<AuditLogIdConverter>();
     }
 
@@ -49,5 +53,6 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
     private sealed class CommentIdConverter() : ValueConverter<CommentId, Guid>(id => id.Value, v => new CommentId(v));
     private sealed class AcceptanceCriterionIdConverter() : ValueConverter<AcceptanceCriterionId, Guid>(id => id.Value, v => new AcceptanceCriterionId(v));
     private sealed class SprintIdConverter() : ValueConverter<SprintId, Guid>(id => id.Value, v => new SprintId(v));
+    private sealed class MilestoneIdConverter() : ValueConverter<MilestoneId, Guid>(id => id.Value, v => new MilestoneId(v));
     private sealed class AuditLogIdConverter() : ValueConverter<AuditLogId, Guid>(id => id.Value, v => new AuditLogId(v));
 }

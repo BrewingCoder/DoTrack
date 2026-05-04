@@ -130,6 +130,64 @@ namespace DoTrack.Migrations.Sqlite.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("DoTrack.Domain.Milestones.Milestone", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4096)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("HoursBudget")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("State")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly?>("TargetDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("VisibleToClient")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("State");
+
+                    b.ToTable("milestones", (string)null);
+                });
+
+            modelBuilder.Entity("DoTrack.Domain.Milestones.MilestoneScope", b =>
+                {
+                    b.Property<Guid>("MilestoneId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("WorkItemId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("MilestoneId", "WorkItemId");
+
+                    b.HasIndex("WorkItemId");
+
+                    b.ToTable("milestone_scope", (string)null);
+                });
+
             modelBuilder.Entity("DoTrack.Domain.Sprints.Sprint", b =>
                 {
                     b.Property<Guid>("Id")
@@ -408,6 +466,21 @@ namespace DoTrack.Migrations.Sqlite.Migrations
                         .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DoTrack.Domain.WorkItems.WorkItem", null)
+                        .WithMany()
+                        .HasForeignKey("WorkItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DoTrack.Domain.Milestones.MilestoneScope", b =>
+                {
+                    b.HasOne("DoTrack.Domain.Milestones.Milestone", null)
+                        .WithMany()
+                        .HasForeignKey("MilestoneId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("DoTrack.Domain.WorkItems.WorkItem", null)
