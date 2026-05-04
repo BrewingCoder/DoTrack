@@ -44,7 +44,7 @@ public abstract class CommentTests<TFixture> : DatabaseTestBase<TFixture>
         await using var ctx = CreateContext();
         await ctx.AuditLogs.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
 
-        var handler = new AddCommentHandler(ctx, TimeProvider.System);
+        var handler = new AddCommentHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var result = await handler.HandleAsync(
             new AddCommentCommand(item.Id, author.Id, "Looks good to me.", IsInternal: false),
             TestContext.Current.CancellationToken);
@@ -65,7 +65,7 @@ public abstract class CommentTests<TFixture> : DatabaseTestBase<TFixture>
         var (item, author) = await SeedAsync();
 
         await using var ctx = CreateContext();
-        var handler = new AddCommentHandler(ctx, TimeProvider.System);
+        var handler = new AddCommentHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var result = await handler.HandleAsync(
             new AddCommentCommand(item.Id, author.Id, "Internal note.", IsInternal: true),
             TestContext.Current.CancellationToken);
@@ -80,7 +80,7 @@ public abstract class CommentTests<TFixture> : DatabaseTestBase<TFixture>
         var (_, author) = await SeedAsync();
 
         await using var ctx = CreateContext();
-        var handler = new AddCommentHandler(ctx, TimeProvider.System);
+        var handler = new AddCommentHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var act = () => handler.HandleAsync(
             new AddCommentCommand(WorkItemId.New(), author.Id, "x", false),
             TestContext.Current.CancellationToken);
@@ -94,7 +94,7 @@ public abstract class CommentTests<TFixture> : DatabaseTestBase<TFixture>
         var body = "Edge: " + new string('x', 5000) + " 漢字 ñ 🚀";
 
         await using var ctx = CreateContext();
-        var handler = new AddCommentHandler(ctx, TimeProvider.System);
+        var handler = new AddCommentHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var result = await handler.HandleAsync(
             new AddCommentCommand(item.Id, author.Id, body, false),
             TestContext.Current.CancellationToken);
@@ -109,7 +109,7 @@ public abstract class CommentTests<TFixture> : DatabaseTestBase<TFixture>
         var (item, author) = await SeedAsync();
 
         await using var ctx = CreateContext();
-        var addHandler = new AddCommentHandler(ctx, TimeProvider.System);
+        var addHandler = new AddCommentHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         await addHandler.HandleAsync(new AddCommentCommand(item.Id, author.Id, "Public", false), TestContext.Current.CancellationToken);
         await addHandler.HandleAsync(new AddCommentCommand(item.Id, author.Id, "Private", true), TestContext.Current.CancellationToken);
 

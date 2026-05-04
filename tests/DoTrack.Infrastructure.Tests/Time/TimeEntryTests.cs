@@ -43,7 +43,7 @@ public abstract class TimeEntryTests<TFixture> : DatabaseTestBase<TFixture>
         await using var ctx = CreateContext();
         await ctx.AuditLogs.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
 
-        var handler = new LogTimeHandler(ctx, TimeProvider.System);
+        var handler = new LogTimeHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var result = await handler.HandleAsync(
             new LogTimeCommand(item.Id, user.Id, DateTimeOffset.UtcNow.AddHours(-2), TimeSpan.FromMinutes(90),
                 "Wrote tests for create handler.", Billable: true, ActivityType: "Development"),
@@ -66,7 +66,7 @@ public abstract class TimeEntryTests<TFixture> : DatabaseTestBase<TFixture>
         var (item, user) = await SeedAsync();
 
         await using var ctx = CreateContext();
-        var handler = new LogTimeHandler(ctx, TimeProvider.System);
+        var handler = new LogTimeHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var act = () => handler.HandleAsync(
             new LogTimeCommand(item.Id, user.Id, DateTimeOffset.UtcNow, TimeSpan.Zero, "x", false, null),
             TestContext.Current.CancellationToken);
@@ -79,7 +79,7 @@ public abstract class TimeEntryTests<TFixture> : DatabaseTestBase<TFixture>
         var (item, user) = await SeedAsync();
 
         await using var ctx = CreateContext();
-        var handler = new LogTimeHandler(ctx, TimeProvider.System);
+        var handler = new LogTimeHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var act = () => handler.HandleAsync(
             new LogTimeCommand(item.Id, user.Id, DateTimeOffset.UtcNow, TimeSpan.FromMinutes(-30), "x", false, null),
             TestContext.Current.CancellationToken);
@@ -92,7 +92,7 @@ public abstract class TimeEntryTests<TFixture> : DatabaseTestBase<TFixture>
         var (item, user) = await SeedAsync();
 
         await using var ctx = CreateContext();
-        var handler = new LogTimeHandler(ctx, TimeProvider.System);
+        var handler = new LogTimeHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var act = () => handler.HandleAsync(
             new LogTimeCommand(item.Id, user.Id, DateTimeOffset.UtcNow, TimeSpan.FromMinutes(15), "  ", false, null),
             TestContext.Current.CancellationToken);
@@ -105,7 +105,7 @@ public abstract class TimeEntryTests<TFixture> : DatabaseTestBase<TFixture>
         var (_, user) = await SeedAsync();
 
         await using var ctx = CreateContext();
-        var handler = new LogTimeHandler(ctx, TimeProvider.System);
+        var handler = new LogTimeHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var act = () => handler.HandleAsync(
             new LogTimeCommand(WorkItemId.New(), user.Id, DateTimeOffset.UtcNow, TimeSpan.FromMinutes(15), "x", false, null),
             TestContext.Current.CancellationToken);
@@ -118,7 +118,7 @@ public abstract class TimeEntryTests<TFixture> : DatabaseTestBase<TFixture>
         var (item, user) = await SeedAsync();
 
         await using var ctx = CreateContext();
-        var log = new LogTimeHandler(ctx, TimeProvider.System);
+        var log = new LogTimeHandler(ctx, TimeProvider.System, new DoTrack.Infrastructure.Outbox.OutboxEmitter(ctx, TimeProvider.System));
         var t0 = DateTimeOffset.UtcNow.AddDays(-3);
         await log.HandleAsync(new LogTimeCommand(item.Id, user.Id, t0.AddHours(2), TimeSpan.FromMinutes(30), "second", false, null), TestContext.Current.CancellationToken);
         await log.HandleAsync(new LogTimeCommand(item.Id, user.Id, t0, TimeSpan.FromMinutes(30), "first", false, null), TestContext.Current.CancellationToken);

@@ -1,13 +1,12 @@
-using System.Text.Json;
 using DoTrack.Application.WorkItems;
-using DoTrack.Domain.Outbox;
 using DoTrack.Domain.WorkItems;
+using DoTrack.Infrastructure.Outbox;
 using DoTrack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoTrack.Infrastructure.WorkItems;
 
-public sealed class CreateWorkItemHandler(DoTrackDbContext db, TimeProvider timeProvider) : ICreateWorkItemHandler
+public sealed class CreateWorkItemHandler(DoTrackDbContext db, TimeProvider timeProvider, OutboxEmitter outbox) : ICreateWorkItemHandler
 {
     public async Task<CreateWorkItemResult> HandleAsync(CreateWorkItemCommand command, CancellationToken cancellationToken)
     {
@@ -34,31 +33,21 @@ public sealed class CreateWorkItemHandler(DoTrackDbContext db, TimeProvider time
 
         db.WorkItems.Add(workItem);
 
-        // Emit issue.created automation event into the outbox. Same transaction as
-        // the WorkItem insert + Project sequence bump — at-least-once delivery
-        // semantics from the OutboxDispatcherService background worker.
-        var payload = new Dictionary<string, object?>
+        outbox.Emit("issue.created", project.Key, new
         {
-            ["workItemId"] = workItem.Id.Value,
-            ["projectKey"] = project.Key,
-            ["number"] = number,
-            ["key"] = $"{project.Key}-{number}",
-            ["tier"] = workItem.Tier.ToString(),
-            ["type"] = workItem.Type?.ToString(),
-            ["title"] = workItem.Title,
-            ["state"] = workItem.State.ToString(),
-            ["reporterId"] = workItem.ReporterId.Value,
-            ["assigneeId"] = workItem.AssigneeId?.Value,
-            ["estimatePoints"] = workItem.EstimatePoints,
-            ["createdAt"] = workItem.CreatedAt
-        };
-        var outbox = new OutboxMessage(
-            OutboxMessageId.New(),
-            eventType: "issue.created",
-            payloadJson: JsonSerializer.Serialize(payload),
-            projectKey: project.Key,
-            now);
-        db.OutboxMessages.Add(outbox);
+            workItemId = workItem.Id.Value,
+            projectKey = project.Key,
+            number,
+            key = $"{project.Key}-{number}",
+            tier = workItem.Tier.ToString(),
+            type = workItem.Type?.ToString(),
+            title = workItem.Title,
+            state = workItem.State.ToString(),
+            reporterId = workItem.ReporterId.Value,
+            assigneeId = workItem.AssigneeId?.Value,
+            estimatePoints = workItem.EstimatePoints,
+            createdAt = workItem.CreatedAt
+        });
 
         await db.SaveChangesAsync(cancellationToken);
 

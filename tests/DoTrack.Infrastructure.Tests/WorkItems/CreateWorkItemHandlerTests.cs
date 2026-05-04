@@ -18,7 +18,10 @@ public abstract class CreateWorkItemHandlerTests<TFixture> : DatabaseTestBase<TF
     protected CreateWorkItemHandlerTests(TFixture fixture) : base(fixture) { }
 
     private static CreateWorkItemHandler CreateHandler(DoTrackDbContext db, TimeProvider? clock = null)
-        => new(db, clock ?? TimeProvider.System);
+    {
+        var time = clock ?? TimeProvider.System;
+        return new CreateWorkItemHandler(db, time, new DoTrack.Infrastructure.Outbox.OutboxEmitter(db, time));
+    }
 
     private async Task<(Project Project, User Reporter)> SeedProjectAndUserAsync(string projectKey = "PROJ")
     {

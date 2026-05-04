@@ -18,7 +18,10 @@ public abstract class UpdateWorkItemHandlerTests<TFixture> : DatabaseTestBase<TF
     protected UpdateWorkItemHandlerTests(TFixture fixture) : base(fixture) { }
 
     private static UpdateWorkItemHandler CreateHandler(DoTrackDbContext db, TimeProvider? clock = null)
-        => new(db, clock ?? TimeProvider.System);
+    {
+        var time = clock ?? TimeProvider.System;
+        return new UpdateWorkItemHandler(db, time, new DoTrack.Infrastructure.Outbox.OutboxEmitter(db, time));
+    }
 
     private async Task<(Project Project, User Reporter, WorkItem Item)> SeedAsync()
     {

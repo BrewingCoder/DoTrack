@@ -15,6 +15,7 @@ using DoTrack.Infrastructure.Auditing;
 using DoTrack.Infrastructure.Comments;
 using DoTrack.Infrastructure.Identity;
 using DoTrack.Infrastructure.Milestones;
+using DoTrack.Infrastructure.Outbox;
 using DoTrack.Infrastructure.Persistence;
 using DoTrack.Infrastructure.SavedQueries;
 using DoTrack.Infrastructure.Sprints;
@@ -34,6 +35,7 @@ public static class DependencyInjection
         Action<DbContextOptionsBuilder> configureDb)
     {
         services.AddSingleton(TimeProvider.System);
+        services.AddScoped<OutboxEmitter>();
         services.AddScoped<IAuditContextAccessor, AmbientAuditContextAccessor>();
         services.TryAddDefaultCurrentUserAccessor();
         services.AddScoped<AuditingInterceptor>();
