@@ -6,6 +6,7 @@ using DoTrack.Api.Comments;
 using DoTrack.Api.Configuration;
 using DoTrack.Api.Middleware;
 using DoTrack.Api.Milestones;
+using DoTrack.Api.SavedQueries;
 using DoTrack.Api.Sprints;
 using DoTrack.Api.Time;
 using DoTrack.Api.Webhooks;
@@ -54,6 +55,7 @@ app.MapTimeEntryEndpoints();
 app.MapAcceptanceCriteriaEndpoints();
 app.MapSprintEndpoints();
 app.MapMilestoneEndpoints();
+app.MapSavedQueryEndpoints();
 app.MapAuditEndpoints();
 app.MapGitHubWebhookEndpoint();
 

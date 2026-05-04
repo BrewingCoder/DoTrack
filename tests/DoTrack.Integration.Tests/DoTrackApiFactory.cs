@@ -57,6 +57,7 @@ public sealed class DoTrackApiFactory : WebApplicationFactory<Program>, IAsyncLi
         await db.TimeEntries.ExecuteDeleteAsync();
         await db.WorkItemHierarchies.ExecuteDeleteAsync();
         await db.WorkItemLinks.ExecuteDeleteAsync();
+        await db.SavedQueries.ExecuteDeleteAsync();
         await db.WorkItems.ExecuteDeleteAsync();
         await db.Sprints.ExecuteDeleteAsync();
         await db.Projects.ExecuteDeleteAsync();

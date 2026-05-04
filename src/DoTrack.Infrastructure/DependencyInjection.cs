@@ -4,6 +4,7 @@ using DoTrack.Application.Auditing;
 using DoTrack.Application.Comments;
 using DoTrack.Application.Identity;
 using DoTrack.Application.Milestones;
+using DoTrack.Application.SavedQueries;
 using DoTrack.Application.Sprints;
 using DoTrack.Application.Time;
 using DoTrack.Application.WorkItems;
@@ -14,6 +15,7 @@ using DoTrack.Infrastructure.Comments;
 using DoTrack.Infrastructure.Identity;
 using DoTrack.Infrastructure.Milestones;
 using DoTrack.Infrastructure.Persistence;
+using DoTrack.Infrastructure.SavedQueries;
 using DoTrack.Infrastructure.Sprints;
 using DoTrack.Infrastructure.Time;
 using DoTrack.Infrastructure.WorkItems;
@@ -69,6 +71,10 @@ public static class DependencyInjection
         services.AddScoped<IRemoveScopeItemHandler, RemoveScopeItemHandler>();
         services.AddScoped<IGetMilestoneScopeHandler, GetMilestoneScopeHandler>();
         services.AddScoped<IGetMilestoneHealthHandler, GetMilestoneHealthHandler>();
+        services.AddScoped<ICreateSavedQueryHandler, CreateSavedQueryHandler>();
+        services.AddScoped<IUpdateSavedQueryHandler, UpdateSavedQueryHandler>();
+        services.AddScoped<IDeleteSavedQueryHandler, DeleteSavedQueryHandler>();
+        services.AddScoped<IListSavedQueriesHandler, ListSavedQueriesHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {
