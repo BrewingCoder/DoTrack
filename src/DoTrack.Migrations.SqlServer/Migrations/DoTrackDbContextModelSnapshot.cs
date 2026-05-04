@@ -135,6 +135,43 @@ namespace DoTrack.Migrations.SqlServer.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("DoTrack.Domain.Sprints.Sprint", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("EndsOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("StartsOn")
+                        .HasColumnType("date");
+
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("ProjectId", "State");
+
+                    b.ToTable("sprints", (string)null);
+                });
+
             modelBuilder.Entity("DoTrack.Domain.Time.TimeEntry", b =>
                 {
                     b.Property<Guid>("Id")
@@ -246,6 +283,9 @@ namespace DoTrack.Migrations.SqlServer.Migrations
                     b.Property<Guid>("ReporterId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("SprintId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("State")
                         .HasColumnType("int");
 
@@ -268,6 +308,8 @@ namespace DoTrack.Migrations.SqlServer.Migrations
                     b.HasIndex("AssigneeId");
 
                     b.HasIndex("ReporterId");
+
+                    b.HasIndex("SprintId");
 
                     b.HasIndex("State");
 
@@ -380,6 +422,15 @@ namespace DoTrack.Migrations.SqlServer.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DoTrack.Domain.Sprints.Sprint", b =>
+                {
+                    b.HasOne("DoTrack.Domain.Workspaces.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DoTrack.Domain.Time.TimeEntry", b =>
                 {
                     b.HasOne("DoTrack.Domain.Identity.User", null)
@@ -427,6 +478,11 @@ namespace DoTrack.Migrations.SqlServer.Migrations
                         .HasForeignKey("ReporterId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("DoTrack.Domain.Sprints.Sprint", null)
+                        .WithMany()
+                        .HasForeignKey("SprintId")
+                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("DoTrack.Domain.WorkItems.WorkItemHierarchy", b =>

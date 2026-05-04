@@ -4,6 +4,7 @@ using DoTrack.Api.Auditing;
 using DoTrack.Api.Comments;
 using DoTrack.Api.Configuration;
 using DoTrack.Api.Middleware;
+using DoTrack.Api.Sprints;
 using DoTrack.Api.Time;
 using DoTrack.Api.Webhooks;
 using DoTrack.Api.WorkItems;
@@ -47,6 +48,7 @@ app.MapWorkItemEndpoints();
 app.MapCommentEndpoints();
 app.MapTimeEntryEndpoints();
 app.MapAcceptanceCriteriaEndpoints();
+app.MapSprintEndpoints();
 app.MapAuditEndpoints();
 app.MapGitHubWebhookEndpoint();
 

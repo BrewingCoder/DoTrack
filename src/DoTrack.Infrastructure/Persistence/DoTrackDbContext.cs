@@ -1,6 +1,7 @@
 using DoTrack.Domain.Auditing;
 using DoTrack.Domain.Comments;
 using DoTrack.Domain.Identity;
+using DoTrack.Domain.Sprints;
 using DoTrack.Domain.Time;
 using DoTrack.Domain.WorkItems;
 using DoTrack.Domain.Workspaces;
@@ -19,6 +20,7 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
     public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<AcceptanceCriterion> AcceptanceCriteria => Set<AcceptanceCriterion>();
+    public DbSet<Sprint> Sprints => Set<Sprint>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -35,6 +37,7 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
         configurationBuilder.Properties<TimeEntryId>().HaveConversion<TimeEntryIdConverter>();
         configurationBuilder.Properties<CommentId>().HaveConversion<CommentIdConverter>();
         configurationBuilder.Properties<AcceptanceCriterionId>().HaveConversion<AcceptanceCriterionIdConverter>();
+        configurationBuilder.Properties<SprintId>().HaveConversion<SprintIdConverter>();
         configurationBuilder.Properties<AuditLogId>().HaveConversion<AuditLogIdConverter>();
     }
 
@@ -45,5 +48,6 @@ public class DoTrackDbContext(DbContextOptions<DoTrackDbContext> options) : DbCo
     private sealed class TimeEntryIdConverter() : ValueConverter<TimeEntryId, Guid>(id => id.Value, v => new TimeEntryId(v));
     private sealed class CommentIdConverter() : ValueConverter<CommentId, Guid>(id => id.Value, v => new CommentId(v));
     private sealed class AcceptanceCriterionIdConverter() : ValueConverter<AcceptanceCriterionId, Guid>(id => id.Value, v => new AcceptanceCriterionId(v));
+    private sealed class SprintIdConverter() : ValueConverter<SprintId, Guid>(id => id.Value, v => new SprintId(v));
     private sealed class AuditLogIdConverter() : ValueConverter<AuditLogId, Guid>(id => id.Value, v => new AuditLogId(v));
 }

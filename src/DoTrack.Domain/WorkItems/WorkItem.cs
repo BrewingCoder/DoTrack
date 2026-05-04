@@ -1,4 +1,5 @@
 using DoTrack.Domain.Identity;
+using DoTrack.Domain.Sprints;
 using DoTrack.Domain.Workspaces;
 
 namespace DoTrack.Domain.WorkItems;
@@ -46,6 +47,7 @@ public sealed class WorkItem
     public UserId ReporterId { get; private set; }
     public UserId? AssigneeId { get; private set; }
     public int? EstimatePoints { get; private set; }
+    public SprintId? SprintId { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
 
@@ -121,6 +123,22 @@ public sealed class WorkItem
         // v0: free-form transitions; state-machine rules (legal transitions per type/project)
         // are deferred to v1 when the configurable workflow ships.
         State = newState;
+        UpdatedAt = now;
+    }
+
+    public void AssignToSprint(SprintId sprintId, DateTimeOffset now)
+    {
+        if (Tier != WorkItemTier.Item)
+        {
+            throw new InvalidOperationException("Only Items can be assigned to a sprint; Epics and Features are scope, not sprint work.");
+        }
+        SprintId = sprintId;
+        UpdatedAt = now;
+    }
+
+    public void RemoveFromSprint(DateTimeOffset now)
+    {
+        SprintId = null;
         UpdatedAt = now;
     }
 }

@@ -2,6 +2,7 @@ using DoTrack.Application.AcceptanceCriteria;
 using DoTrack.Application.Abstractions;
 using DoTrack.Application.Auditing;
 using DoTrack.Application.Comments;
+using DoTrack.Application.Sprints;
 using DoTrack.Application.Time;
 using DoTrack.Application.WorkItems;
 using DoTrack.Application.Workspaces;
@@ -9,6 +10,7 @@ using DoTrack.Infrastructure.AcceptanceCriteria;
 using DoTrack.Infrastructure.Auditing;
 using DoTrack.Infrastructure.Comments;
 using DoTrack.Infrastructure.Persistence;
+using DoTrack.Infrastructure.Sprints;
 using DoTrack.Infrastructure.Time;
 using DoTrack.Infrastructure.WorkItems;
 using DoTrack.Infrastructure.Workspaces;
@@ -40,6 +42,12 @@ public static class DependencyInjection
         services.AddScoped<IAddCriterionHandler, AddCriterionHandler>();
         services.AddScoped<IUpdateCriterionStatusHandler, UpdateCriterionStatusHandler>();
         services.AddScoped<IListCriteriaHandler, ListCriteriaHandler>();
+        services.AddScoped<ICreateSprintHandler, CreateSprintHandler>();
+        services.AddScoped<IUpdateSprintHandler, UpdateSprintHandler>();
+        services.AddScoped<IDeleteSprintHandler, DeleteSprintHandler>();
+        services.AddScoped<IListSprintsHandler, ListSprintsHandler>();
+        services.AddScoped<IAssignToSprintHandler, AssignToSprintHandler>();
+        services.AddScoped<IListSprintWorkItemsHandler, ListSprintWorkItemsHandler>();
 
         services.AddDbContext<DoTrackDbContext>((sp, options) =>
         {
