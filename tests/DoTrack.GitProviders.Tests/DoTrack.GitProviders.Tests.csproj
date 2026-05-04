@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DoTrack.GitProviders.GitHub\DoTrack.GitProviders.GitHub.csproj" />
+    <ProjectReference Include="..\..\src\DoTrack.GitProviders.Gitea\DoTrack.GitProviders.Gitea.csproj" />
+    <ProjectReference Include="..\..\src\DoTrack.GitProviders.Bitbucket\DoTrack.GitProviders.Bitbucket.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="AwesomeAssertions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

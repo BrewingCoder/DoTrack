@@ -1,0 +1,44 @@
+# .NET build output
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/launch.json
+.idea/
+*.swp
+
+# Rider
+*.DotSettings.user
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# Node / web
+web/node_modules/
+web/dist/
+web/.vite/
+web/.turbo/
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.local
+
+# Local dev rigs (data volumes etc)
+.dev/**/data/
+.dev/**/conf/
+.dev/**/logs/
+.dev/**/backups/

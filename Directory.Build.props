@@ -1,0 +1,30 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <Company>DoTrack</Company>
+    <Product>DoTrack</Product>
+    <Copyright>Copyright (c) DoTrack contributors</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- EF Core scaffolds migration code that trips IDE0161 (file-scoped namespace)
+       and CA1861 (static readonly array). These projects are auto-generated; suppress. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('DoTrack.Migrations.'))">
+    <NoWarn>$(NoWarn);IDE0161;CA1861</NoWarn>
+  </PropertyGroup>
+</Project>

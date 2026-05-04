@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\DoTrack.Application\DoTrack.Application.csproj" />
+    <ProjectReference Include="..\DoTrack.Infrastructure\DoTrack.Infrastructure.csproj" />
+    <ProjectReference Include="..\DoTrack.Workers\DoTrack.Workers.csproj" />
+    <ProjectReference Include="..\DoTrack.QueryLanguage\DoTrack.QueryLanguage.csproj" />
+    <ProjectReference Include="..\DoTrack.GitProviders.GitHub\DoTrack.GitProviders.GitHub.csproj" />
+    <ProjectReference Include="..\DoTrack.GitProviders.Gitea\DoTrack.GitProviders.Gitea.csproj" />
+    <ProjectReference Include="..\DoTrack.GitProviders.Bitbucket\DoTrack.GitProviders.Bitbucket.csproj" />
+    <ProjectReference Include="..\DoTrack.Automation.N8n\DoTrack.Automation.N8n.csproj" />
+    <ProjectReference Include="..\DoTrack.Migrations.Postgres\DoTrack.Migrations.Postgres.csproj" />
+    <ProjectReference Include="..\DoTrack.Migrations.SqlServer\DoTrack.Migrations.SqlServer.csproj" />
+    <ProjectReference Include="..\DoTrack.Migrations.Sqlite\DoTrack.Migrations.Sqlite.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+  </ItemGroup>
+</Project>

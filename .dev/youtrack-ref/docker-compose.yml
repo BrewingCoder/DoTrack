@@ -1,0 +1,16 @@
+name: dotrack-yt-ref
+
+services:
+  youtrack:
+    image: jetbrains/youtrack:2026.1.13162
+    container_name: dotrack-yt-ref
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8888:8080"
+    volumes:
+      - ./data:/opt/youtrack/data
+      - ./conf:/opt/youtrack/conf
+      - ./logs:/opt/youtrack/logs
+      - ./backups:/opt/youtrack/backups
+    environment:
+      YOUTRACK_JVM_OPTS: "-Xms1g -Xmx2g"

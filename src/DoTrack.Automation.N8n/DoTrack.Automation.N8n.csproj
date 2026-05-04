@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\DoTrack.Automation.Abstractions\DoTrack.Automation.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

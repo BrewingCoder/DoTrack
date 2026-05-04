@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DoTrack.Api/DoTrack.Api.csproj" />
+    <Project Path="src/DoTrack.Application/DoTrack.Application.csproj" />
+    <Project Path="src/DoTrack.Automation.Abstractions/DoTrack.Automation.Abstractions.csproj" />
+    <Project Path="src/DoTrack.Automation.N8n/DoTrack.Automation.N8n.csproj" />
+    <Project Path="src/DoTrack.Domain/DoTrack.Domain.csproj" />
+    <Project Path="src/DoTrack.GitProviders.Abstractions/DoTrack.GitProviders.Abstractions.csproj" />
+    <Project Path="src/DoTrack.GitProviders.Bitbucket/DoTrack.GitProviders.Bitbucket.csproj" />
+    <Project Path="src/DoTrack.GitProviders.Gitea/DoTrack.GitProviders.Gitea.csproj" />
+    <Project Path="src/DoTrack.GitProviders.GitHub/DoTrack.GitProviders.GitHub.csproj" />
+    <Project Path="src/DoTrack.Infrastructure/DoTrack.Infrastructure.csproj" />
+    <Project Path="src/DoTrack.Migrations.Postgres/DoTrack.Migrations.Postgres.csproj" />
+    <Project Path="src/DoTrack.Migrations.Sqlite/DoTrack.Migrations.Sqlite.csproj" />
+    <Project Path="src/DoTrack.Migrations.SqlServer/DoTrack.Migrations.SqlServer.csproj" />
+    <Project Path="src/DoTrack.QueryLanguage/DoTrack.QueryLanguage.csproj" />
+    <Project Path="src/DoTrack.Workers/DoTrack.Workers.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DoTrack.Application.Tests/DoTrack.Application.Tests.csproj" />
+    <Project Path="tests/DoTrack.Domain.Tests/DoTrack.Domain.Tests.csproj" />
+    <Project Path="tests/DoTrack.GitProviders.Tests/DoTrack.GitProviders.Tests.csproj" />
+    <Project Path="tests/DoTrack.Infrastructure.Tests/DoTrack.Infrastructure.Tests.csproj" />
+    <Project Path="tests/DoTrack.Integration.Tests/DoTrack.Integration.Tests.csproj" />
+    <Project Path="tests/DoTrack.QueryLanguage.Tests/DoTrack.QueryLanguage.Tests.csproj" />
+  </Folder>
+</Solution>

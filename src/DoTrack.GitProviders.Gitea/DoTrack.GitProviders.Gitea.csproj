@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\DoTrack.GitProviders.Abstractions\DoTrack.GitProviders.Abstractions.csproj" />
+  </ItemGroup>
+</Project>
