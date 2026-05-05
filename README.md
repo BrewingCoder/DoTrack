@@ -9,7 +9,7 @@ A self-hosted, OSS issue tracker and project manager designed for small dev team
 ## Stack
 
 - **Backend:** .NET 10 + EF Core (multi-provider: PostgreSQL / SQL Server / SQLite; MySQL deferred until Pomelo ships EF Core 10)
-- **Frontend:** Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui (Nova preset, Geist). TanStack Query for fetch state, TanStack Router for routing. NSwag for typed TS clients generated against the running API.
+- **Frontend:** Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui (Nova preset). Visual language emulates JetBrains YouTrack 2026.x — dark canvas, 200px left navigation rail, system-ui at 14px. TanStack Query for fetch state, TanStack Router for routing. NSwag for typed TS clients generated against the running API.
 - **Distribution:** Docker Compose at root for full stack; Helm chart later
 - **License:** Apache 2.0
 

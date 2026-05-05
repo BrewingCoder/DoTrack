@@ -75,6 +75,23 @@ Multi-provider matrix proven: every infrastructure test runs against Postgres + 
 - Auth UI — `ICurrentUserAccessor` still returns null; the seed script picks an existing user.
 - TypedResults refactor across the remaining ~25 endpoints. We're using Path A: annotate as the UI consumes.
 
+## Session — May 5 2026 (UI design language locked: emulate YouTrack)
+
+YouTrack 2026.x is the SPA's visual + IA reference, not just a UX rig. Tokens, font stack, and the 200px left navigation rail were captured from the running YT instance via Brave's CDP, ported into `frontend/src/index.css` against the shadcn variable names.
+
+| What | Where |
+|---|---|
+| YT palette → shadcn tokens | `frontend/src/index.css` (`:root` + `.dark`); single dark theme |
+| System-ui font stack at 14px / 20px line-height | same file; Geist dropped |
+| 200px left nav rail with grouped placeholders + bottom utility group | `frontend/src/components/Layout.tsx` (workspace selector at top of rail, Issues + Projects active, rest greyed `Coming soon`) |
+| `<html class="dark">` so shadcn dark variants gate correctly | `frontend/index.html` |
+| YouTrack rig port mapping fix (host 8888 → container 8888 after the wizard rewrote listen-port) | `.dev/youtrack-ref/docker-compose.yml` |
+| Locked decision text | `docs/DECISIONS.md` |
+| Process — capture-then-port | `docs/CONVENTIONS.md` |
+| Hard rule update | `CLAUDE.md` rule 10 |
+
+Verified live against the running rigs: `body` background `rgb(30,31,34)`, sidebar `rgb(24,25,27)` with 1px right border `rgb(78,81,87)`, font stack identical, 14px / 20px line-height — all matched against YT's computed styles.
+
 ## Known TODO / production concerns recorded inline
 
 - **SQLite + DateTimeOffset ORDER BY** — handlers sort client-side; production should add a monotonic `Sequence` column on audit_logs / comments / time entries before high-volume use.

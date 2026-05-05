@@ -22,7 +22,7 @@ Self-hosted OSS issue tracker / project manager. .NET 10 backend with EF Core mu
 7. PATCH endpoints use null-means-no-change semantics. Explicit clear/unassign requires a separate endpoint.
 8. Outbox emission belongs in the same `SaveChanges` as the domain change. Use `OutboxEmitter.Emit(...)` before `SaveChangesAsync`.
 9. Don't commit unless explicitly asked. Don't push without explicit ask.
-10. Don't start a new UI feature without the YouTrack reference rig running at `localhost:8888`. Compose file at `.dev/youtrack-ref/` (or via the `dotrack` umbrella at `.dev/docker-compose.yml`).
+10. Don't start a new UI feature without the YouTrack reference rig running at `localhost:8888`. Compose file at `.dev/youtrack-ref/` (or via the `dotrack` umbrella at `.dev/docker-compose.yml`). The SPA emulates YouTrack's information architecture and visual tokens — mirror the YT counterpart first, capture tokens from the running rig, then map onto the shadcn variable names already wired in `frontend/src/index.css`. Detail in `docs/DECISIONS.md` and `docs/CONVENTIONS.md`.
 11. `AddConfiguredDatabase` reads `IConfiguration` *inside* the `AddDbContext` factory delegate, not at registration time. Reverting to eager registration silently routes integration tests to the dev rig DB. The regression guard in `DoTrackApiFactory.InitializeAsync` will fail any test run that does this.
 12. Add `.Produces<T>(StatusCodes.Status200OK)` to GET endpoints that the UI consumes. Without it, NSwag emits `void`/`any` returns. Path A (annotate-as-you-go) is the locked strategy — see `docs/DECISIONS.md`.
 13. After adding/modifying endpoints the UI uses, regenerate the TS client with `pnpm --dir frontend gen:api` against the running API. Commit the regenerated file with the change.
@@ -32,7 +32,7 @@ Self-hosted OSS issue tracker / project manager. .NET 10 backend with EF Core mu
 - .NET 10 + EF Core multi-provider
 - xUnit.v3 + Shouldly + NSubstitute + Bogus + Verify.XunitV3
 - Apache 2.0
-- Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui (Nova preset, Geist) at `frontend/`
+- Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui (Nova preset) at `frontend/`. System-ui font stack to match the YouTrack reference (Geist dropped 2026-05-05).
 - TanStack Query 5 + TanStack Router 1 (code-based routing)
 - NSwag for typed TS client gen against the running API at `:5259`
 - No JVM languages anywhere in the stack

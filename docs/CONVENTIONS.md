@@ -111,6 +111,17 @@ When the SPA needs to consume an existing endpoint:
 4. **Add a client singleton** in `frontend/src/lib/api.ts` if the new tag's client class isn't already exposed.
 5. **Wrap calls in TanStack Query** (`useQuery` / `useMutation`) inside the page component. Use a stable `queryKey` of `[entity, ...path-params]`.
 
+## UI emulation — YouTrack first
+
+Before building a new UI surface, look at how YouTrack does it. The reference rig is the source of truth:
+
+1. **Confirm YT is running** at `http://localhost:8888` (Hard rule 10 — `.dev/youtrack-ref/docker-compose.yml`).
+2. **Inspect the live DOM** rather than guessing — open the matching YT page, attach DevTools, read computed styles for the elements you're cloning. Token names live on `:root` as `--ring-*` and `--navigation-*`.
+3. **Port to shadcn names** in `frontend/src/index.css`. The mapping is already done for sidebar, background, primary, accent, border, foreground, muted; reuse those instead of inventing parallel tokens.
+4. **Mirror the IA** — match grouping, ordering, density. Innovation goes at the workflow layer, not the chrome.
+
+Frontend tokens are a single dark theme today. If a light theme lands, capture YT's light palette the same way and gate via the existing `.dark` class.
+
 ## Frontend page template
 
 When adding a new page:

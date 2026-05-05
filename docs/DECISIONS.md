@@ -137,6 +137,14 @@ Reading at registration time captured `appsettings.Development.json`'s value bef
 
 Deferred. `ICurrentUserAccessor` exists; `NullCurrentUserAccessor` returns null in v0. OIDC + local accounts wire up later.
 
+## UI design language — emulate JetBrains YouTrack
+
+YouTrack 2026.x is the reference UX. The SPA mirrors its information architecture (200px left navigation rail, grouped menu, top-of-rail workspace switcher, bottom utility group) and its visual tokens (dark canvas `rgb(30,31,34)`, sidebar `rgb(24,25,27)`, primary `rgb(54,106,207)`, system-ui font stack at 14px / 20px line-height, 6px navigation radius).
+
+Tokens are mapped to shadcn variable names in `frontend/src/index.css` so the rest of the component library inherits the same palette. The token capture is mechanical — open the YT rig at `:8888`, attach a CDP-capable browser, dump computed `--ring-*` and `--navigation-*` values, port to `:root`. Re-run when YouTrack ships a theme refresh.
+
+When adding a new component, find its YouTrack counterpart first and mirror it; only diverge for DoTrack-specific surfaces. Innovation belongs at the workflow layer (T&M, audit log, multi-provider Git), not the chrome.
+
 ## Force-pushes to `main`
 
 Two ever, both early in v0 baseline (commit-author email correction, closure-table FK fix). The branch is now stable; treat history as read-only.
