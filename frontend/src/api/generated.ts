@@ -668,7 +668,7 @@ export interface IAuditClient {
      * @param limit (optional) 
      * @return OK
      */
-    history(wsSlug: string, projKey: string, number: number, limit: number | undefined): Promise<void>;
+    history(wsSlug: string, projKey: string, number: number, limit: number | undefined): Promise<AuditLogResponse[]>;
 }
 
 export class AuditClient implements IAuditClient {
@@ -685,7 +685,7 @@ export class AuditClient implements IAuditClient {
      * @param limit (optional) 
      * @return OK
      */
-    history(wsSlug: string, projKey: string, number: number, limit: number | undefined): Promise<void> {
+    history(wsSlug: string, projKey: string, number: number, limit: number | undefined): Promise<AuditLogResponse[]> {
         let url_ = this.baseUrl + "/api/v1/workspaces/{wsSlug}/projects/{projKey}/work-items/{number}/history?";
         if (wsSlug === undefined || wsSlug === null)
             throw new globalThis.Error("The parameter 'wsSlug' must be defined.");
@@ -705,6 +705,7 @@ export class AuditClient implements IAuditClient {
         let options_: RequestInit = {
             method: "GET",
             headers: {
+                "Accept": "application/json"
             }
         };
 
@@ -713,19 +714,21 @@ export class AuditClient implements IAuditClient {
         });
     }
 
-    protected processHistory(response: Response): Promise<void> {
+    protected processHistory(response: Response): Promise<AuditLogResponse[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-            return;
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AuditLogResponse[];
+            return result200;
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<void>(null as any);
+        return Promise.resolve<AuditLogResponse[]>(null as any);
     }
 }
 
@@ -1173,7 +1176,7 @@ export interface IWorkItemsClient {
     /**
      * @return OK
      */
-    workItemsGET(wsSlug: string, projKey: string, number: number): Promise<void>;
+    workItemsGET(wsSlug: string, projKey: string, number: number): Promise<WorkItemResponse>;
 
     /**
      * @param body (optional) 
@@ -1292,7 +1295,7 @@ export class WorkItemsClient implements IWorkItemsClient {
     /**
      * @return OK
      */
-    workItemsGET(wsSlug: string, projKey: string, number: number): Promise<void> {
+    workItemsGET(wsSlug: string, projKey: string, number: number): Promise<WorkItemResponse> {
         let url_ = this.baseUrl + "/api/v1/workspaces/{wsSlug}/projects/{projKey}/work-items/{number}";
         if (wsSlug === undefined || wsSlug === null)
             throw new globalThis.Error("The parameter 'wsSlug' must be defined.");
@@ -1308,6 +1311,7 @@ export class WorkItemsClient implements IWorkItemsClient {
         let options_: RequestInit = {
             method: "GET",
             headers: {
+                "Accept": "application/json"
             }
         };
 
@@ -1316,19 +1320,21 @@ export class WorkItemsClient implements IWorkItemsClient {
         });
     }
 
-    protected processWorkItemsGET(response: Response): Promise<void> {
+    protected processWorkItemsGET(response: Response): Promise<WorkItemResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-            return;
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as WorkItemResponse;
+            return result200;
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<void>(null as any);
+        return Promise.resolve<WorkItemResponse>(null as any);
     }
 
     /**
@@ -1638,13 +1644,13 @@ export interface ICommentsClient {
      * @param body (optional) 
      * @return OK
      */
-    commentsPOST(wsSlug: string, projKey: string, number: number, body: AddCommentRequest | null | undefined): Promise<void>;
+    comments(wsSlug: string, projKey: string, number: number, body: AddCommentRequest | null | undefined): Promise<void>;
 
     /**
      * @param includeInternal (optional) 
      * @return OK
      */
-    commentsGET(wsSlug: string, projKey: string, number: number, includeInternal: boolean | undefined): Promise<void>;
+    commentsAll(wsSlug: string, projKey: string, number: number, includeInternal: boolean | undefined): Promise<CommentResponse[]>;
 }
 
 export class CommentsClient implements ICommentsClient {
@@ -1661,7 +1667,7 @@ export class CommentsClient implements ICommentsClient {
      * @param body (optional) 
      * @return OK
      */
-    commentsPOST(wsSlug: string, projKey: string, number: number, body: AddCommentRequest | null | undefined): Promise<void> {
+    comments(wsSlug: string, projKey: string, number: number, body: AddCommentRequest | null | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/v1/workspaces/{wsSlug}/projects/{projKey}/work-items/{number}/comments";
         if (wsSlug === undefined || wsSlug === null)
             throw new globalThis.Error("The parameter 'wsSlug' must be defined.");
@@ -1685,11 +1691,11 @@ export class CommentsClient implements ICommentsClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCommentsPOST(_response);
+            return this.processComments(_response);
         });
     }
 
-    protected processCommentsPOST(response: Response): Promise<void> {
+    protected processComments(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -1708,7 +1714,7 @@ export class CommentsClient implements ICommentsClient {
      * @param includeInternal (optional) 
      * @return OK
      */
-    commentsGET(wsSlug: string, projKey: string, number: number, includeInternal: boolean | undefined): Promise<void> {
+    commentsAll(wsSlug: string, projKey: string, number: number, includeInternal: boolean | undefined): Promise<CommentResponse[]> {
         let url_ = this.baseUrl + "/api/v1/workspaces/{wsSlug}/projects/{projKey}/work-items/{number}/comments?";
         if (wsSlug === undefined || wsSlug === null)
             throw new globalThis.Error("The parameter 'wsSlug' must be defined.");
@@ -1728,27 +1734,30 @@ export class CommentsClient implements ICommentsClient {
         let options_: RequestInit = {
             method: "GET",
             headers: {
+                "Accept": "application/json"
             }
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCommentsGET(_response);
+            return this.processCommentsAll(_response);
         });
     }
 
-    protected processCommentsGET(response: Response): Promise<void> {
+    protected processCommentsAll(response: Response): Promise<CommentResponse[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-            return;
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as CommentResponse[];
+            return result200;
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<void>(null as any);
+        return Promise.resolve<CommentResponse[]>(null as any);
     }
 }
 
@@ -2640,6 +2649,35 @@ export interface AssignToSprintRequest {
     [key: string]: any;
 }
 
+export interface AuditLogResponse {
+    id: string;
+    entityType: string;
+    entityId: string;
+    changeType: ChangeType;
+    changedByUserId: string | undefined;
+    occurredAt: string;
+    source: string;
+    changeReason: string | undefined;
+    sourceMetadata: { [key: string]: string; } | undefined;
+    fieldChanges: FieldChange[];
+
+    [key: string]: any;
+}
+
+export type ChangeType = "Insert" | "Update" | "Delete";
+
+export interface CommentResponse {
+    id: string;
+    workItemId: string;
+    authorId: string;
+    body: string;
+    isInternal: boolean;
+    createdAt: string;
+    updatedAt: string | undefined;
+
+    [key: string]: any;
+}
+
 export interface CreateMilestoneRequest {
     name: string;
     description: string | undefined;
@@ -2701,6 +2739,14 @@ export interface CreateWorkItemRequest {
 export interface CreateWorkspaceRequest {
     name: string;
     slug: string;
+
+    [key: string]: any;
+}
+
+export interface FieldChange {
+    fieldName?: string;
+    oldValue?: string | undefined;
+    newValue?: string | undefined;
 
     [key: string]: any;
 }

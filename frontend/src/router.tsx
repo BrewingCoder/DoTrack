@@ -8,6 +8,7 @@ import {
 import { Layout } from '@/components/Layout'
 import { workspacesClient } from '@/lib/api'
 import { ProjectsPage } from '@/pages/ProjectsPage'
+import { WorkItemDetailPage } from '@/pages/WorkItemDetailPage'
 import { WorkItemsPage } from '@/pages/WorkItemsPage'
 
 const rootRoute = createRootRoute({
@@ -55,9 +56,19 @@ const projectItemsRoute = createRoute({
   component: WorkItemsPage,
 })
 
+const projectItemDetailRoute = createRoute({
+  getParentRoute: () => workspaceRoute,
+  path: 'projects/$projKey/items/$number',
+  component: WorkItemDetailPage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  workspaceRoute.addChildren([workspaceIndexRoute, projectItemsRoute]),
+  workspaceRoute.addChildren([
+    workspaceIndexRoute,
+    projectItemsRoute,
+    projectItemDetailRoute,
+  ]),
 ])
 
 export const router = createRouter({ routeTree })

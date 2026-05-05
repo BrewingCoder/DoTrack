@@ -74,8 +74,24 @@ export function WorkItemsPage() {
           )}
           {itemsQuery.data?.map((w) => (
             <TableRow key={w.id}>
-              <TableCell className="font-mono">{w.key}</TableCell>
-              <TableCell className="font-medium">{w.title}</TableCell>
+              <TableCell className="font-mono">
+                <Link
+                  to="/workspaces/$wsSlug/projects/$projKey/items/$number"
+                  params={{ wsSlug, projKey, number: String(w.number) }}
+                  className="hover:underline"
+                >
+                  {w.key}
+                </Link>
+              </TableCell>
+              <TableCell className="font-medium">
+                <Link
+                  to="/workspaces/$wsSlug/projects/$projKey/items/$number"
+                  params={{ wsSlug, projKey, number: String(w.number) }}
+                  className="hover:underline"
+                >
+                  {w.title}
+                </Link>
+              </TableCell>
               <TableCell>
                 <Badge variant={tierVariant(w.tier)}>{w.tier}</Badge>
               </TableCell>
