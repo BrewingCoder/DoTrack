@@ -102,7 +102,7 @@ type NavLinkProps = {
 function NavLink({ icon: Icon, label, to, params, disabled }: NavLinkProps) {
   const baseClass =
     'group flex items-center gap-2.5 h-10 px-2.5 rounded-md text-sm transition-colors'
-  const idleClass = 'text-sidebar-foreground hover:bg-[var(--sidebar-hover)]'
+  const idleClass = 'text-sidebar-foreground hover:bg-sidebar-hover'
   const disabledClass = 'text-sidebar-muted/70 cursor-default'
 
   if (disabled || !to) {
@@ -111,7 +111,7 @@ function NavLink({ icon: Icon, label, to, params, disabled }: NavLinkProps) {
         className={cn(baseClass, disabled ? disabledClass : idleClass)}
         title={disabled ? 'Coming soon' : undefined}
       >
-        <Icon className="size-4 text-[var(--sidebar-icon)]" />
+        <Icon className="size-4 text-sidebar-icon" />
         <span className="truncate">{label}</span>
       </span>
     )
@@ -130,7 +130,7 @@ function NavLink({ icon: Icon, label, to, params, disabled }: NavLinkProps) {
       }}
       activeOptions={{ exact: true }}
     >
-      <Icon className="size-4 text-[var(--sidebar-icon)]" />
+      <Icon className="size-4 text-sidebar-icon" />
       <span className="truncate">{label}</span>
     </Link>
   )
