@@ -13,7 +13,8 @@ public static class AuditEndpoints
         routes.MapGet(
             "/api/v1/workspaces/{wsSlug}/projects/{projKey}/work-items/{number:int}/history",
             GetWorkItemHistoryAsync)
-            .WithTags("Audit");
+            .WithTags("Audit")
+            .Produces<List<AuditLogResponse>>(StatusCodes.Status200OK);
         return routes;
     }
 

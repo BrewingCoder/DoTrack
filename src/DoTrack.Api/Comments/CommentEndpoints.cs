@@ -14,7 +14,7 @@ public static class CommentEndpoints
             .WithTags("Comments");
 
         group.MapPost("/", AddAsync);
-        group.MapGet("/", ListAsync);
+        group.MapGet("/", ListAsync).Produces<List<CommentResponse>>(StatusCodes.Status200OK);
 
         return routes;
     }

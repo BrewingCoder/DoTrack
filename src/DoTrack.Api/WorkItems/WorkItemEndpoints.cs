@@ -12,7 +12,7 @@ public static class WorkItemEndpoints
 
         group.MapPost("/", CreateAsync);
         group.MapGet("/", ListAsync).Produces<List<WorkItemResponse>>(StatusCodes.Status200OK);
-        group.MapGet("/{number:int}", GetAsync);
+        group.MapGet("/{number:int}", GetAsync).Produces<WorkItemResponse>(StatusCodes.Status200OK);
         group.MapPatch("/{number:int}", PatchAsync);
         group.MapPost("/{number:int}/parent", SetParentAsync);
         group.MapDelete("/{number:int}/parent", RemoveParentAsync);
