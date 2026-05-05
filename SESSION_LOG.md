@@ -92,6 +92,17 @@ YouTrack 2026.x is the SPA's visual + IA reference, not just a UX rig. Tokens, f
 
 Verified live against the running rigs: `body` background `rgb(30,31,34)`, sidebar `rgb(24,25,27)` with 1px right border `rgb(78,81,87)`, font stack identical, 14px / 20px line-height — all matched against YT's computed styles.
 
+## Session — May 5 2026 (afternoon — Playwright + issue list overhaul)
+
+| What | Where |
+|---|---|
+| Three sidebar custom tokens promoted into `@theme inline` so Layout uses `bg-sidebar-hover` / `text-sidebar-icon` instead of arbitrary-value syntax | `frontend/src/index.css`, `frontend/src/components/Layout.tsx` |
+| YouTrack wizard listen-port flow documented (the dance behind the `8888:8888` mapping) | `.dev/youtrack-ref/README.md` |
+| Playwright wired as a frontend dev dep with two projects (`dotrack` at :5273, `youtrack` at :8888), file-prefix-based test routing, smoke + comparison spec stubs | `frontend/package.json`, `frontend/playwright.config.ts`, `frontend/tests/e2e/` |
+| Issue list rebuilt on TanStack Table — 10 columns (Key/Title/Tier/Type/State default-visible; Reporter/Assignee/Estimate/Created/Updated default-hidden), click-to-sort headers, Columns dropdown with visibility checkboxes + Move Up/Down buttons, prefs persisted to `localStorage` under `dotrack:work-items-table` | `frontend/src/pages/WorkItemsPage.tsx` |
+
+Verified end-to-end: 4 dotrack Playwright specs pass + 1 youtrack rig probe; sort/visibility/order survive a page reload.
+
 ## Known TODO / production concerns recorded inline
 
 - **SQLite + DateTimeOffset ORDER BY** — handlers sort client-side; production should add a monotonic `Sequence` column on audit_logs / comments / time entries before high-volume use.

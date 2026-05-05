@@ -131,3 +131,40 @@ When adding a new page:
 3. **Read route params** via `useParams({ from: '/route/path' })` for type-safe access.
 4. **Reuse shadcn primitives** from `frontend/src/components/ui/`. Run `pnpm dlx shadcn@latest add <name>` to install new ones; they're checked into source.
 5. **Reference implementation:** `frontend/src/pages/WorkItemDetailPage.tsx` shows the full pattern (multiple chained queries, tabs, sidebar metadata, loading/error/empty states).
+
+### Data tables — TanStack Table
+
+For list pages with sortable columns, ad-hoc visibility, or user-controllable ordering, use `@tanstack/react-table` rather than rolling state by hand. Reference: `frontend/src/pages/WorkItemsPage.tsx`.
+
+The pattern in that file:
+
+- `ColumnDef<T>[]` array with `id`, `accessorKey` or `accessorFn`, custom `cell` renderer, and optional `enableSorting`.
+- `useReactTable({ state: { sorting, columnVisibility, columnOrder }, ...handlers, getSortedRowModel })`.
+- Persist preferences to `localStorage` via a `useEffect` keyed on the relevant state. Single global key (e.g. `dotrack:work-items-table`) is fine for v0; per-project keys when the surface diverges.
+- "Columns" dropdown (shadcn `DropdownMenu`) shows all columns in current order, with checkboxes for visibility and `MoveUp` / `MoveDown` (lucide) buttons. Drag-to-reorder lands when there's a real need.
+
+### base-ui primitives use `render`, not `asChild`
+
+shadcn's components in this codebase wrap `@base-ui/react`, not Radix. Where Radix uses `asChild` to merge props onto a custom child, base-ui uses `render={...}`:
+
+```tsx
+<DropdownMenuTrigger render={<Button variant="outline">Open</Button>} />
+```
+
+Same idea, different prop name. The TS error is clear when you use `asChild` by accident: `Property 'asChild' does not exist on type ...`.
+
+## Playwright — DoTrack and YouTrack as separate test projects
+
+`frontend/playwright.config.ts` defines two projects: `dotrack` (`http://localhost:5273`) and `youtrack` (`http://localhost:8888`). Filter by filename prefix:
+
+- `tests/e2e/dotrack.*.spec.ts` runs in the `dotrack` project.
+- `tests/e2e/youtrack.*.spec.ts` runs in the `youtrack` project.
+- Comparison-style tests (loading both rigs side-by-side) can use either project; pick the one whose `baseURL` is your starting point and `await page.goto(absoluteUrl)` for the other.
+
+Scripts:
+
+- `pnpm test:e2e` — both projects.
+- `pnpm test:e2e:ui` — Playwright's UI mode for live debugging.
+- `pnpm test:e2e:dotrack` / `pnpm test:e2e:youtrack` — single-project filters.
+
+Both servers must be running before tests (API on `:5259`, SPA on `:5273`, YT rig on `:8888`). No webServer block in the config — bring them up by hand or via the `dotrack` umbrella compose.

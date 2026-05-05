@@ -33,8 +33,9 @@ Self-hosted OSS issue tracker / project manager. .NET 10 backend with EF Core mu
 - xUnit.v3 + Shouldly + NSubstitute + Bogus + Verify.XunitV3
 - Apache 2.0
 - Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui (Nova preset) at `frontend/`. System-ui font stack to match the YouTrack reference (Geist dropped 2026-05-05).
-- TanStack Query 5 + TanStack Router 1 (code-based routing)
+- TanStack Query 5 + TanStack Router 1 (code-based routing) + TanStack Table 8 (issue list)
 - NSwag for typed TS client gen against the running API at `:5259`
+- Playwright for E2E + DoTrack-vs-YouTrack comparison tests; two projects in `playwright.config.ts`
 - No JVM languages anywhere in the stack
 
 ## Pattern templates
@@ -46,8 +47,10 @@ When adding a new use case, copy the existing pattern. Reference implementations
 - Endpoint group: `src/DoTrack.Api/WorkItems/WorkItemEndpoints.cs`
 - Adapter: `src/DoTrack.GitProviders.GitHub/GitHubAdapter.cs`
 - SPA page (read-only): `frontend/src/pages/WorkItemDetailPage.tsx`
+- SPA data table (sort + column visibility + ordering + persistence): `frontend/src/pages/WorkItemsPage.tsx`
 - SPA route wiring: `frontend/src/router.tsx` (code-based, nested under `workspaceRoute`)
 - API client singletons: `frontend/src/lib/api.ts`
+- E2E test: `frontend/tests/e2e/dotrack.smoke.spec.ts` (and `youtrack.compare.spec.ts` against the reference rig)
 
 `docs/CONVENTIONS.md` walks the templates.
 
