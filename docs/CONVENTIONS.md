@@ -100,3 +100,23 @@ When you add a new persisted entity:
 2. Update `DoTrackApiFactory.ResetDataAsync` to delete the same table.
 
 Tests fail fast when this is missed: rows leak between tests and assertions on counts break.
+
+## Wiring an endpoint into the SPA
+
+When the SPA needs to consume an existing endpoint:
+
+1. **Annotate the endpoint** with `.Produces<TResponse>(StatusCodes.Status200OK)` so the OpenAPI spec carries the response schema. Without this, NSwag emits `void` / `any`. Path A annotation strategy — annotate as the UI consumes, not preemptively.
+2. **Restart the API** so the spec reflects the change.
+3. **Regenerate the TS client**: `cd frontend && pnpm gen:api`. Commit the regenerated `frontend/src/api/generated.ts` with the change.
+4. **Add a client singleton** in `frontend/src/lib/api.ts` if the new tag's client class isn't already exposed.
+5. **Wrap calls in TanStack Query** (`useQuery` / `useMutation`) inside the page component. Use a stable `queryKey` of `[entity, ...path-params]`.
+
+## Frontend page template
+
+When adding a new page:
+
+1. **Create the component** under `frontend/src/pages/`. Use the layout shell automatically (it wraps everything via the rootRoute).
+2. **Register the route** in `frontend/src/router.tsx`. Nest under `workspaceRoute` if it operates within a workspace context (uses `$wsSlug`).
+3. **Read route params** via `useParams({ from: '/route/path' })` for type-safe access.
+4. **Reuse shadcn primitives** from `frontend/src/components/ui/`. Run `pnpm dlx shadcn@latest add <name>` to install new ones; they're checked into source.
+5. **Reference implementation:** `frontend/src/pages/WorkItemDetailPage.tsx` shows the full pattern (multiple chained queries, tabs, sidebar metadata, loading/error/empty states).

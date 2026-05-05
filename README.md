@@ -4,12 +4,12 @@ A self-hosted, OSS issue tracker and project manager designed for small dev team
 
 > Looks like JIRA, weighs like Vikunja, treats clients as first-class participants without per-seat pricing.
 
-**Status:** v0 — backend API surface online. Frontend deferred until UX-reference rig (YouTrack) is populated and the design language settles.
+**Status:** v0 — backend API surface online. Read-only SPA scaffold (workspaces / projects / work items / detail) live alongside the YouTrack UX-reference rig. Mutations and remaining pages still to come.
 
 ## Stack
 
 - **Backend:** .NET 10 + EF Core (multi-provider: PostgreSQL / SQL Server / SQLite; MySQL deferred until Pomelo ships EF Core 10)
-- **Frontend:** React + shadcn/ui + Tailwind + TipTap + Vaul (PWA) — *not yet started*
+- **Frontend:** Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui (Nova preset, Geist). TanStack Query for fetch state, TanStack Router for routing. NSwag for typed TS clients generated against the running API.
 - **Distribution:** Docker Compose at root for full stack; Helm chart later
 - **License:** Apache 2.0
 
@@ -47,7 +47,14 @@ src/
   DoTrack.Api/                          ASP.NET Core composition root
 tests/
   DoTrack.{Domain,Application,Infrastructure,QueryLanguage,GitProviders,Integration}.Tests/
+frontend/
+  src/api/generated.ts NSwag-generated typed TS client (regenerated via `pnpm gen:api`)
+  src/components/      Layout shell + shadcn/ui components
+  src/lib/             API client singletons + QueryClient
+  src/pages/           Page components (ProjectsPage, WorkItemsPage, WorkItemDetailPage)
+  src/router.tsx       TanStack Router code-based route tree
 .dev/
+  docker-compose.yml   Umbrella `dotrack` project (Postgres + YouTrack)
   youtrack-ref/        Local YouTrack container (UX reference rig)
   postgres-dev/        Local Postgres for migrations + dev runs
   sqlserver-dev/       Local SQL Server (amd64 under Rosetta on AIRM5)
@@ -67,10 +74,10 @@ dotnet test
 
 ## Run locally
 
-Start the dev databases:
+Start the dev rig (Postgres + YouTrack reference) under one Docker project named `dotrack`:
 
 ```sh
-docker compose -f .dev/postgres-dev/docker-compose.yml up -d
+docker compose -f .dev/docker-compose.yml up -d
 ```
 
 Run the API:
@@ -79,7 +86,21 @@ Run the API:
 dotnet run --project src/DoTrack.Api --launch-profile http
 ```
 
-The API listens on http://localhost:5259. Bootstrap with the API itself:
+The API listens on `http://localhost:5259`:
+- OpenAPI doc: `/openapi/v1.json`
+- Swagger UI: `/swagger` (dev only)
+
+Run the frontend (in another terminal):
+
+```sh
+cd frontend
+pnpm install            # first time only
+pnpm dev                # http://localhost:5273
+```
+
+The Vite dev server proxies `/api`, `/healthz`, and `/openapi` to the API, so the SPA is same-origin in dev.
+
+Bootstrap with the API directly:
 
 ```sh
 curl -X POST http://localhost:5259/api/v1/workspaces -H 'Content-Type: application/json' \
@@ -90,7 +111,11 @@ curl -X POST http://localhost:5259/api/v1/users -H 'Content-Type: application/js
   -d '{"email":"alice@example.com","displayName":"Alice"}'
 ```
 
-OpenAPI document at `/openapi/v1.json` in development.
+After adding/changing endpoints the SPA consumes, regenerate the typed client:
+
+```sh
+cd frontend && pnpm gen:api
+```
 
 ## Configuration
 

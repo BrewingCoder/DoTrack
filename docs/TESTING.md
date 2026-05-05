@@ -45,6 +45,10 @@ Single-provider (Postgres) via `DoTrackApiFactory : WebApplicationFactory<Progra
 
 Use `ApiJsonOptions.Default` for both serialization (`PostAsJsonAsync`) and deserialization (`ReadFromJsonAsync`). Camel-case + `JsonStringEnumConverter`.
 
+### Test isolation
+
+The factory's `InitializeAsync` carries a regression guard that asserts the resolved DbContext is bound to a connection string containing `dotrack_integration` (the testcontainer's database name). Without it, eager configuration reads in `AddConfiguredDatabase` silently routed every integration test to the developer's `dotrack_dev` Postgres on `:5433`. The fix lives in `src/DoTrack.Api/Configuration/DatabaseRegistration.cs` — config must be resolved inside the `AddDbContext` factory delegate, not at registration time. If the guard ever fires, that's the regression to look for.
+
 ## Provider quirks
 
 ### SQLite — VARCHAR length

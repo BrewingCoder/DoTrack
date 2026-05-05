@@ -97,9 +97,41 @@ HTTP integration tests share one `DoTrackApiFactory` per assembly via `[Collecti
 
 Manual validators. Static method, returns `IDictionary<string, string[]>?`. Endpoints pipe to `Results.ValidationProblem`.
 
-## Frontend stack (deferred)
+## Frontend stack
 
-When frontend work starts: React + shadcn/ui + Tailwind + TipTap + Vaul. Mobile-first PWA. Path A — desktop primary, intentional mobile variants for triage / comment / my-work / mobile board. No JVM languages.
+Vite + React + TypeScript + Tailwind v4 + shadcn/ui (Nova preset, Geist font). TanStack Query 5 for fetch state, TanStack Router 1 (code-based) for routing. Path A — desktop primary, intentional mobile variants for triage / comment / my-work / mobile board. PWA shell ships when a feature needs it (TipTap, Vaul). No JVM languages.
+
+Frontend lives at `frontend/` in the repo root, not under `src/` (which is reserved for .NET projects).
+
+## Frontend dev port
+
+Vite binds `127.0.0.1:5273` (not the Vite default 5173, which clashes with another project on this machine). `strictPort: true` so collisions fail loudly instead of silently shifting. The dev API CORS rule and the Vite proxy both use 5273.
+
+## Vite dev proxy = same-origin frontend↔API
+
+In dev, `frontend/vite.config.ts` proxies `/api`, `/healthz`, `/openapi` to `http://localhost:5259`. The SPA uses relative URLs (empty baseUrl on the generated NSwag clients). Same-origin in dev means no cross-origin CORS gymnastics; in prod, the same paths are served by the same reverse proxy that serves the SPA.
+
+The dev-only CORS policy in `Program.cs` is technically dead code now — kept as a safety net if the proxy is removed.
+
+## OpenAPI client generation — NSwag, on-demand
+
+`pnpm gen:api` regenerates `frontend/src/api/generated.ts` from the running API at `http://localhost:5259/openapi/v1.json`. Configured for Fetch template, Interface type style, StringLiteral enums, `dateTimeType: "string"` (DateTimeOffset wire format honesty), `MultipleClientsFromFirstTagAndOperationId` so each tag becomes its own client class.
+
+Spec generation stays on `.NET-native AddOpenApi` (`Microsoft.AspNetCore.OpenApi`); Swashbuckle is in only for the SwaggerUI shell at `/swagger`.
+
+## Path A — annotate `.Produces<T>(200)` per endpoint as the UI consumes it
+
+Endpoints currently use `IResult` returns (`Results.Ok(...)`). The .NET-native OpenAPI generator can only infer response schemas from `TypedResults.Ok<T>(...)` or explicit `.Produces<T>(200)` registrations. Without one, NSwag emits `void`/`any` returns and the codegen pipeline loses its value.
+
+Decision: annotate endpoints with `.Produces<TResponse>(200)` as the UI consumes them, rather than refactoring all ~30 endpoints to `TypedResults.Ok<T>` up front. New UI features carry their annotations forward. Eventually the full TypedResults refactor lands as its own phase.
+
+## DbContext config resolved inside the factory delegate
+
+`AddConfiguredDatabase` resolves `Database:Provider` and `Database:ConnectionString` from `IServiceProvider.GetRequiredService<IConfiguration>()` *inside* the `AddDbContext` factory delegate, not at registration time.
+
+Reading at registration time captured `appsettings.Development.json`'s value before `WebApplicationFactory.ConfigureAppConfiguration` overrides could be applied — every integration test silently ran against the developer's dev rig DB instead of its testcontainer. Reading inside the factory delegate ensures the test harness's InMemoryCollection wins.
+
+`DoTrackApiFactory.InitializeAsync` carries a regression guard that asserts the resolved DbContext is bound to `dotrack_integration`. Reverting to eager registration fails loudly on every test run.
 
 ## Authentication
 

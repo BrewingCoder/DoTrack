@@ -1,6 +1,6 @@
 # CLAUDE.md — agent instructions for DoTrack
 
-Self-hosted OSS issue tracker / project manager. .NET 10 backend with EF Core multi-provider (Postgres / SQL Server / SQLite). React frontend deferred until a UX-reference rig is populated.
+Self-hosted OSS issue tracker / project manager. .NET 10 backend with EF Core multi-provider (Postgres / SQL Server / SQLite). React + Vite + Tailwind + shadcn/ui frontend at `frontend/`, read-only in v0 (workspaces / projects / work items / work item detail).
 
 ## Read first
 
@@ -22,14 +22,19 @@ Self-hosted OSS issue tracker / project manager. .NET 10 backend with EF Core mu
 7. PATCH endpoints use null-means-no-change semantics. Explicit clear/unassign requires a separate endpoint.
 8. Outbox emission belongs in the same `SaveChanges` as the domain change. Use `OutboxEmitter.Emit(...)` before `SaveChangesAsync`.
 9. Don't commit unless explicitly asked. Don't push without explicit ask.
-10. Don't start UI work without the YouTrack reference rig running at `localhost:8888`. Compose file at `.dev/youtrack-ref/`.
+10. Don't start a new UI feature without the YouTrack reference rig running at `localhost:8888`. Compose file at `.dev/youtrack-ref/` (or via the `dotrack` umbrella at `.dev/docker-compose.yml`).
+11. `AddConfiguredDatabase` reads `IConfiguration` *inside* the `AddDbContext` factory delegate, not at registration time. Reverting to eager registration silently routes integration tests to the dev rig DB. The regression guard in `DoTrackApiFactory.InitializeAsync` will fail any test run that does this.
+12. Add `.Produces<T>(StatusCodes.Status200OK)` to GET endpoints that the UI consumes. Without it, NSwag emits `void`/`any` returns. Path A (annotate-as-you-go) is the locked strategy — see `docs/DECISIONS.md`.
+13. After adding/modifying endpoints the UI uses, regenerate the TS client with `pnpm --dir frontend gen:api` against the running API. Commit the regenerated file with the change.
 
 ## Stack anchors
 
 - .NET 10 + EF Core multi-provider
 - xUnit.v3 + Shouldly + NSubstitute + Bogus + Verify.XunitV3
 - Apache 2.0
-- React + shadcn/ui + Tailwind + TipTap + Vaul (PWA) — frontend deferred
+- Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui (Nova preset, Geist) at `frontend/`
+- TanStack Query 5 + TanStack Router 1 (code-based routing)
+- NSwag for typed TS client gen against the running API at `:5259`
 - No JVM languages anywhere in the stack
 
 ## Pattern templates
@@ -37,8 +42,12 @@ Self-hosted OSS issue tracker / project manager. .NET 10 backend with EF Core mu
 When adding a new use case, copy the existing pattern. Reference implementations:
 
 - Use case end-to-end: `CreateWorkItem` (Application command + Infrastructure handler + Api endpoint + multi-provider tests)
+- Read-only use case: `ListWorkItemsForProject` (query + handler + endpoint + multi-provider integration tests + HTTP integration tests, all in one phase)
 - Endpoint group: `src/DoTrack.Api/WorkItems/WorkItemEndpoints.cs`
 - Adapter: `src/DoTrack.GitProviders.GitHub/GitHubAdapter.cs`
+- SPA page (read-only): `frontend/src/pages/WorkItemDetailPage.tsx`
+- SPA route wiring: `frontend/src/router.tsx` (code-based, nested under `workspaceRoute`)
+- API client singletons: `frontend/src/lib/api.ts`
 
 `docs/CONVENTIONS.md` walks the templates.
 
