@@ -9,7 +9,8 @@ public sealed record UpdateWorkItemCommand(
     string? Description,
     UserId? AssigneeId,
     int? EstimatePoints,
-    WorkItemState? State);
+    WorkItemState? State,
+    WorkItemPriority? Priority = null);
 
 public sealed record UpdateWorkItemResult(WorkItemId Id);
 

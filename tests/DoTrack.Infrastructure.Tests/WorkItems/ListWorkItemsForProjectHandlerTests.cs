@@ -44,6 +44,7 @@ public abstract class ListWorkItemsForProjectHandlerTests<TFixture> : DatabaseTe
             reporterId,
             null,
             null,
+            WorkItemPriority.Normal,
             DateTimeOffset.UtcNow);
 
     [Fact]
@@ -90,8 +91,9 @@ public abstract class ListWorkItemsForProjectHandlerTests<TFixture> : DatabaseTe
             TestContext.Current.CancellationToken);
 
         result.Count.ShouldBe(1);
-        result[0].Title.ShouldBe("Only item");
-        result[0].Number.ShouldBe(1);
+        result[0].Item.Title.ShouldBe("Only item");
+        result[0].Item.Number.ShouldBe(1);
+        result[0].ParentKey.ShouldBeNull();
     }
 
     [Fact]
@@ -112,8 +114,8 @@ public abstract class ListWorkItemsForProjectHandlerTests<TFixture> : DatabaseTe
             new ListWorkItemsForProjectQuery(project.Id),
             TestContext.Current.CancellationToken);
 
-        result.Select(w => w.Number).ShouldBe([1, 2, 3]);
-        result.Select(w => w.Title).ShouldBe(["First", "Second", "Third"]);
+        result.Select(w => w.Item.Number).ShouldBe([1, 2, 3]);
+        result.Select(w => w.Item.Title).ShouldBe(["First", "Second", "Third"]);
     }
 
     [Fact]
@@ -136,8 +138,8 @@ public abstract class ListWorkItemsForProjectHandlerTests<TFixture> : DatabaseTe
             TestContext.Current.CancellationToken);
 
         resultA.Count.ShouldBe(1);
-        resultA[0].Title.ShouldBe("A-1");
-        resultA.ShouldAllBe(w => w.ProjectId == projectA.Id);
+        resultA[0].Item.Title.ShouldBe("A-1");
+        resultA.ShouldAllBe(w => w.Item.ProjectId == projectA.Id);
     }
 
     [Fact]
@@ -158,7 +160,7 @@ public abstract class ListWorkItemsForProjectHandlerTests<TFixture> : DatabaseTe
             TestContext.Current.CancellationToken);
 
         result.Count.ShouldBe(3);
-        result.Select(w => w.Tier).ShouldBe([WorkItemTier.Epic, WorkItemTier.Feature, WorkItemTier.Item]);
+        result.Select(w => w.Item.Tier).ShouldBe([WorkItemTier.Epic, WorkItemTier.Feature, WorkItemTier.Item]);
     }
 
     [Fact]
@@ -181,7 +183,68 @@ public abstract class ListWorkItemsForProjectHandlerTests<TFixture> : DatabaseTe
             TestContext.Current.CancellationToken);
 
         result.Count.ShouldBe(count);
-        result.Select(w => w.Number).ShouldBe(Enumerable.Range(1, count));
+        result.Select(w => w.Item.Number).ShouldBe(Enumerable.Range(1, count));
+    }
+
+    [Fact]
+    public async Task Handle_DirectParents_ExposedAsParentKey_DeepAncestorsIgnored()
+    {
+        var (project, reporter) = await SeedProjectAsync();
+        await using (var seed = CreateContext())
+        {
+            var epic = MakeItem(project.Id, reporter.Id, 1, "Epic", tier: WorkItemTier.Epic);
+            var feature = MakeItem(project.Id, reporter.Id, 2, "Feature", tier: WorkItemTier.Feature);
+            var item = MakeItem(project.Id, reporter.Id, 3, "Item", tier: WorkItemTier.Item, type: WorkItemType.Task);
+            seed.WorkItems.AddRange(epic, feature, item);
+
+            // Self-rows + direct + indirect closure entries.
+            seed.WorkItemHierarchies.Add(new WorkItemHierarchy(epic.Id, epic.Id, 0));
+            seed.WorkItemHierarchies.Add(new WorkItemHierarchy(feature.Id, feature.Id, 0));
+            seed.WorkItemHierarchies.Add(new WorkItemHierarchy(item.Id, item.Id, 0));
+            seed.WorkItemHierarchies.Add(new WorkItemHierarchy(epic.Id, feature.Id, 1));
+            seed.WorkItemHierarchies.Add(new WorkItemHierarchy(feature.Id, item.Id, 1));
+            // depth=2 grandparent — must NOT surface as ParentKey.
+            seed.WorkItemHierarchies.Add(new WorkItemHierarchy(epic.Id, item.Id, 2));
+            await seed.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        await using var ctx = CreateContext();
+        var result = await new ListWorkItemsForProjectHandler(ctx).HandleAsync(
+            new ListWorkItemsForProjectQuery(project.Id),
+            TestContext.Current.CancellationToken);
+
+        result.Count.ShouldBe(3);
+        result.Single(r => r.Item.Number == 1).ParentKey.ShouldBeNull();
+        result.Single(r => r.Item.Number == 2).ParentKey.ShouldBe("PROJ-1");
+        // Direct parent only — Epic is depth=2, so Item's ParentKey is the Feature, not the Epic.
+        result.Single(r => r.Item.Number == 3).ParentKey.ShouldBe("PROJ-2");
+    }
+
+    [Fact]
+    public async Task Handle_CrossProjectParent_ParentKeyCarriesOtherProjectKey()
+    {
+        var (childProject, reporter) = await SeedProjectAsync("CHILD");
+        await using var setup = CreateContext();
+        var parentProjectWorkspace = WorkspaceBuilder.One();
+        var parentProject = new Project(ProjectId.New(), parentProjectWorkspace.Id, "OTHER", "Other", null, DateTimeOffset.UtcNow);
+        var parentEpic = MakeItem(parentProject.Id, reporter.Id, 7, "Cross-project Epic", tier: WorkItemTier.Epic);
+        var childFeature = MakeItem(childProject.Id, reporter.Id, 1, "Feature under remote Epic", tier: WorkItemTier.Feature);
+        setup.Workspaces.Add(parentProjectWorkspace);
+        setup.Projects.Add(parentProject);
+        setup.WorkItems.Add(parentEpic);
+        setup.WorkItems.Add(childFeature);
+        setup.WorkItemHierarchies.Add(new WorkItemHierarchy(parentEpic.Id, parentEpic.Id, 0));
+        setup.WorkItemHierarchies.Add(new WorkItemHierarchy(childFeature.Id, childFeature.Id, 0));
+        setup.WorkItemHierarchies.Add(new WorkItemHierarchy(parentEpic.Id, childFeature.Id, 1));
+        await setup.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await using var ctx = CreateContext();
+        var result = await new ListWorkItemsForProjectHandler(ctx).HandleAsync(
+            new ListWorkItemsForProjectQuery(childProject.Id),
+            TestContext.Current.CancellationToken);
+
+        result.Count.ShouldBe(1);
+        result[0].ParentKey.ShouldBe("OTHER-7");
     }
 }
 

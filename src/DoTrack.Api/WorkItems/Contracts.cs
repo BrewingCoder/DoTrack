@@ -9,7 +9,8 @@ public sealed record CreateWorkItemRequest(
     string? Description,
     Guid ReporterId,
     Guid? AssigneeId,
-    int? EstimatePoints);
+    int? EstimatePoints,
+    WorkItemPriority? Priority);
 
 // PATCH semantics: null/missing means "no change." Once a work item is
 // assigned, it cannot be unassigned via this endpoint; same for clearing
@@ -19,7 +20,8 @@ public sealed record UpdateWorkItemRequest(
     string? Description,
     Guid? AssigneeId,
     int? EstimatePoints,
-    WorkItemState? State);
+    WorkItemState? State,
+    WorkItemPriority? Priority);
 
 // Body for POST /work-items/{n}/parent. The parent is identified by its
 // number within a project — same workspace+project by default, or specify
@@ -37,10 +39,12 @@ public sealed record WorkItemResponse(
     WorkItemTier Tier,
     WorkItemType? Type,
     WorkItemState State,
+    WorkItemPriority Priority,
     string Title,
     string? Description,
     Guid ReporterId,
     Guid? AssigneeId,
     int? EstimatePoints,
+    string? ParentKey,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt);

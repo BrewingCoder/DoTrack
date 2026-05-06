@@ -26,7 +26,7 @@ public abstract class TimeEntryTests<TFixture> : DatabaseTestBase<TFixture>
         var item = new WorkItem(
             WorkItemId.New(), project.Id, project.AllocateNextWorkItemNumber(),
             WorkItemTier.Item, WorkItemType.Task, "Sample", null,
-            user.Id, null, null, DateTimeOffset.UtcNow);
+            user.Id, null, null, WorkItemPriority.Normal, DateTimeOffset.UtcNow);
         ctx.Workspaces.Add(workspace);
         ctx.Projects.Add(project);
         ctx.Users.Add(user);

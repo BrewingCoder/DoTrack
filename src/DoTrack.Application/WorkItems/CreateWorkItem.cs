@@ -12,7 +12,8 @@ public sealed record CreateWorkItemCommand(
     string? Description,
     UserId ReporterId,
     UserId? AssigneeId,
-    int? EstimatePoints);
+    int? EstimatePoints,
+    WorkItemPriority? Priority = null);
 
 public sealed record CreateWorkItemResult(WorkItemId Id, int Number);
 

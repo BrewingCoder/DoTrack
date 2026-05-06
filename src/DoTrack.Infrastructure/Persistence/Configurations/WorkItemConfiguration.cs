@@ -18,6 +18,7 @@ internal sealed class WorkItemConfiguration : IEntityTypeConfiguration<WorkItem>
         b.Property(x => x.Tier).HasConversion<int>().IsRequired();
         b.Property(x => x.Type).HasConversion<int?>();
         b.Property(x => x.State).HasConversion<int>().IsRequired();
+        b.Property(x => x.Priority).HasConversion<int>().IsRequired();
         b.Property(x => x.Title).HasMaxLength(512).IsRequired();
         b.Property(x => x.Description);
         b.Property(x => x.ReporterId).IsRequired();

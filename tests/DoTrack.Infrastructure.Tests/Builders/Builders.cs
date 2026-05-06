@@ -75,7 +75,8 @@ public static class WorkItemBuilder
         string? title = null,
         string? description = null,
         UserId? assigneeId = null,
-        int? estimatePoints = null)
+        int? estimatePoints = null,
+        WorkItemPriority priority = WorkItemPriority.Normal)
     {
         var faker = new Faker();
         return new WorkItem(
@@ -89,6 +90,7 @@ public static class WorkItemBuilder
             reporterId,
             assigneeId,
             estimatePoints,
+            priority,
             DateTimeOffset.UtcNow);
     }
 }

@@ -39,7 +39,7 @@ public abstract class SetWorkItemParentHandlerTests<TFixture> : DatabaseTestBase
         var workItem = new WorkItem(
             WorkItemId.New(), project.Id, number, tier,
             tier == WorkItemTier.Item ? (type ?? WorkItemType.Task) : null,
-            $"{tier} #{number}", null, reporter.Id, null, null, DateTimeOffset.UtcNow);
+            $"{tier} #{number}", null, reporter.Id, null, null, WorkItemPriority.Normal, DateTimeOffset.UtcNow);
         ctx.WorkItems.Add(workItem);
         await ctx.SaveChangesAsync();
         return workItem;

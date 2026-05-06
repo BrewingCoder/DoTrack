@@ -29,6 +29,7 @@ public sealed class CreateWorkItemHandler(DoTrackDbContext db, TimeProvider time
             command.ReporterId,
             command.AssigneeId,
             command.EstimatePoints,
+            command.Priority ?? WorkItemPriority.Normal,
             now);
 
         db.WorkItems.Add(workItem);

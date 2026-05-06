@@ -241,6 +241,61 @@ public abstract class CreateWorkItemHandlerTests<TFixture> : DatabaseTestBase<TF
     }
 
     [Fact]
+    public async Task Handle_PriorityOmitted_DefaultsToNormal()
+    {
+        var (project, reporter) = await SeedProjectAndUserAsync();
+
+        await using var ctx = CreateContext();
+        var cmd = new CreateWorkItemCommand(
+            project.Id, WorkItemTier.Item, WorkItemType.Task, "no priority on the wire",
+            null, reporter.Id, null, null);
+
+        var result = await CreateHandler(ctx).HandleAsync(cmd, TestContext.Current.CancellationToken);
+
+        var saved = await ctx.WorkItems.SingleAsync(w => w.Id == result.Id, TestContext.Current.CancellationToken);
+        saved.Priority.ShouldBe(WorkItemPriority.Normal);
+    }
+
+    [Theory]
+    [InlineData(WorkItemPriority.ShowStopper)]
+    [InlineData(WorkItemPriority.Critical)]
+    [InlineData(WorkItemPriority.Major)]
+    [InlineData(WorkItemPriority.Normal)]
+    [InlineData(WorkItemPriority.Minor)]
+    public async Task Handle_PriorityProvided_PersistsExactly(WorkItemPriority priority)
+    {
+        var (project, reporter) = await SeedProjectAndUserAsync();
+
+        await using var ctx = CreateContext();
+        var cmd = new CreateWorkItemCommand(
+            project.Id, WorkItemTier.Item, WorkItemType.Task,
+            $"priority {priority}", null, reporter.Id, null, null, priority);
+
+        var result = await CreateHandler(ctx).HandleAsync(cmd, TestContext.Current.CancellationToken);
+
+        var saved = await ctx.WorkItems.SingleAsync(w => w.Id == result.Id, TestContext.Current.CancellationToken);
+        saved.Priority.ShouldBe(priority);
+    }
+
+    [Fact]
+    public async Task Handle_PriorityOnEpic_PersistsRegardlessOfTier()
+    {
+        var (project, reporter) = await SeedProjectAndUserAsync();
+
+        await using var ctx = CreateContext();
+        var cmd = new CreateWorkItemCommand(
+            project.Id, WorkItemTier.Epic, null,
+            "Strategic initiative", null, reporter.Id, null, null,
+            WorkItemPriority.ShowStopper);
+
+        var result = await CreateHandler(ctx).HandleAsync(cmd, TestContext.Current.CancellationToken);
+
+        var saved = await ctx.WorkItems.SingleAsync(w => w.Id == result.Id, TestContext.Current.CancellationToken);
+        saved.Priority.ShouldBe(WorkItemPriority.ShowStopper);
+        saved.Tier.ShouldBe(WorkItemTier.Epic);
+    }
+
+    [Fact]
     public async Task Handle_ProjectSequence_PersistsAcrossContexts()
     {
         var (project, reporter) = await SeedProjectAndUserAsync();

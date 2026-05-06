@@ -37,7 +37,9 @@ public static class WorkItemEndpoints
         }
 
         var items = await listHandler.HandleAsync(new ListWorkItemsForProjectQuery(project.ProjectId), cancellationToken);
-        var responses = items.Select(w => WorkItemContractMapper.ToResponse(w, project.ProjectKey)).ToList();
+        var responses = items
+            .Select(li => WorkItemContractMapper.ToResponse(li.Item, project.ProjectKey, li.ParentKey))
+            .ToList();
         return Results.Ok(responses);
     }
 

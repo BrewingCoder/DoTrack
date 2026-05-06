@@ -27,7 +27,7 @@ public abstract class CommentTests<TFixture> : DatabaseTestBase<TFixture>
         var item = new WorkItem(
             WorkItemId.New(), project.Id, project.AllocateNextWorkItemNumber(),
             WorkItemTier.Item, WorkItemType.Task, "Sample", null,
-            reporter.Id, null, null, DateTimeOffset.UtcNow);
+            reporter.Id, null, null, WorkItemPriority.Normal, DateTimeOffset.UtcNow);
         ctx.Workspaces.Add(workspace);
         ctx.Projects.Add(project);
         ctx.Users.Add(reporter);

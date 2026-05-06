@@ -32,7 +32,7 @@ public abstract class UpdateWorkItemHandlerTests<TFixture> : DatabaseTestBase<TF
         var workItem = new WorkItem(
             WorkItemId.New(), project.Id, project.AllocateNextWorkItemNumber(),
             WorkItemTier.Item, WorkItemType.Task, "Initial Title", "Initial Description",
-            reporter.Id, null, 5, DateTimeOffset.UtcNow);
+            reporter.Id, null, 5, WorkItemPriority.Normal, DateTimeOffset.UtcNow);
         setup.Workspaces.Add(workspace);
         setup.Projects.Add(project);
         setup.Users.Add(reporter);
@@ -174,6 +174,73 @@ public abstract class UpdateWorkItemHandlerTests<TFixture> : DatabaseTestBase<TF
         var cmd = new UpdateWorkItemCommand(item.Id, null, null, null, -1, null);
         var act = () => CreateHandler(ctx).HandleAsync(cmd, TestContext.Current.CancellationToken);
         await act.ShouldThrowAsync<ArgumentOutOfRangeException>();
+    }
+
+    [Theory]
+    [InlineData(WorkItemPriority.ShowStopper)]
+    [InlineData(WorkItemPriority.Critical)]
+    [InlineData(WorkItemPriority.Major)]
+    [InlineData(WorkItemPriority.Minor)]
+    public async Task Update_PriorityProvided_PersistsAndAuditsDiff(WorkItemPriority priority)
+    {
+        var (_, _, item) = await SeedAsync();
+
+        await using var ctx = CreateContext();
+        await ctx.AuditLogs.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+
+        var cmd = new UpdateWorkItemCommand(item.Id, null, null, null, null, null, priority);
+        await CreateHandler(ctx).HandleAsync(cmd, TestContext.Current.CancellationToken);
+
+        var reloaded = await ctx.WorkItems.SingleAsync(w => w.Id == item.Id, TestContext.Current.CancellationToken);
+        reloaded.Priority.ShouldBe(priority);
+
+        var audit = await ctx.AuditLogs.SingleAsync(TestContext.Current.CancellationToken);
+        audit.FieldChanges.ShouldContain(fc =>
+            fc.FieldName == "Priority" &&
+            fc.OldValue == nameof(WorkItemPriority.Normal) &&
+            fc.NewValue == priority.ToString());
+    }
+
+    [Fact]
+    public async Task Update_PriorityOmitted_LeavesPriorityUnchanged()
+    {
+        var (_, _, item) = await SeedAsync();
+        // Pre-set the item to Major; null priority on the next PATCH must leave it alone.
+        await using (var setup = CreateContext())
+        {
+            await setup.WorkItems
+                .Where(w => w.Id == item.Id)
+                .ExecuteUpdateAsync(s => s.SetProperty(w => w.Priority, WorkItemPriority.Major), TestContext.Current.CancellationToken);
+        }
+
+        await using var ctx = CreateContext();
+        await ctx.AuditLogs.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+
+        var cmd = new UpdateWorkItemCommand(item.Id, "New Title", null, null, null, null, null);
+        await CreateHandler(ctx).HandleAsync(cmd, TestContext.Current.CancellationToken);
+
+        var reloaded = await ctx.WorkItems.SingleAsync(w => w.Id == item.Id, TestContext.Current.CancellationToken);
+        reloaded.Priority.ShouldBe(WorkItemPriority.Major);
+
+        var audit = await ctx.AuditLogs.SingleAsync(TestContext.Current.CancellationToken);
+        audit.FieldChanges.ShouldNotContain(fc => fc.FieldName == "Priority");
+    }
+
+    [Fact]
+    public async Task Update_PrioritySameAsCurrent_DoesNotIncludePriorityFieldChange()
+    {
+        var (_, _, item) = await SeedAsync();
+        // Seeded item is Normal already; PATCH Normal → Normal.
+        await using var ctx = CreateContext();
+        await ctx.AuditLogs.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+
+        var cmd = new UpdateWorkItemCommand(item.Id, null, null, null, null, null, WorkItemPriority.Normal);
+        await CreateHandler(ctx).HandleAsync(cmd, TestContext.Current.CancellationToken);
+
+        // The setter still bumps UpdatedAt so an audit row exists, but the Priority
+        // field itself is unchanged, so it must not appear in the field-changes diff.
+        var audits = await ctx.AuditLogs.ToListAsync(TestContext.Current.CancellationToken);
+        audits.SelectMany(a => a.FieldChanges).ShouldNotContain(fc => fc.FieldName == "Priority");
     }
 
     [Fact]

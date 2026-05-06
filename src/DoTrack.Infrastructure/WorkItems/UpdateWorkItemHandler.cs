@@ -39,6 +39,10 @@ public sealed class UpdateWorkItemHandler(DoTrackDbContext db, TimeProvider time
         {
             workItem.TransitionState(newState, now);
         }
+        if (command.Priority is { } newPriority)
+        {
+            workItem.SetPriority(newPriority, now);
+        }
 
         var project = await db.Projects.SingleAsync(p => p.Id == workItem.ProjectId, cancellationToken);
 

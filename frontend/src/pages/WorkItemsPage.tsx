@@ -4,16 +4,21 @@ import { Link, useParams } from '@tanstack/react-router'
 import {
   type ColumnDef,
   type ColumnOrderState,
+  type ExpandedState,
+  type RowSelectionState,
   type SortingState,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
 import {
   ArrowDown,
   ArrowUp,
+  ChevronDown,
+  ChevronRight,
   ChevronsUpDown,
   MoveDown,
   MoveUp,
@@ -21,6 +26,8 @@ import {
 } from 'lucide-react'
 import { workItemsClient } from '@/lib/api'
 import type { WorkItemResponse, WorkItemState, WorkItemTier } from '@/api/generated'
+import { PriorityChip } from '@/components/PriorityChip'
+import { SelectionToolbar } from '@/components/SelectionToolbar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -126,6 +133,29 @@ export function WorkItemsPage() {
   const [sorting, setSorting] = useState<SortingState>(initial.sort)
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(initial.visibility)
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(initial.order)
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [expanded, setExpanded] = useState<ExpandedState>(true)
+
+  // Build a parent → children map and the top-level subset.
+  // Items whose parent isn't in this project's visible set (e.g. cross-project
+  // Epic→Feature link) render as roots so the tree stays well-formed.
+  const { topLevelRows, childrenByParent } = useMemo(() => {
+    const all = itemsQuery.data ?? []
+    const visible = new Set(all.map((r) => r.key))
+    const map = new Map<string, WorkItemResponse[]>()
+    const tops: WorkItemResponse[] = []
+    for (const row of all) {
+      const parent = row.parentKey
+      if (parent && visible.has(parent)) {
+        const list = map.get(parent) ?? []
+        list.push(row)
+        map.set(parent, list)
+      } else {
+        tops.push(row)
+      }
+    }
+    return { topLevelRows: tops, childrenByParent: map }
+  }, [itemsQuery.data])
 
   useEffect(() => {
     savePrefs({ sort: sorting, visibility: columnVisibility, order: columnOrder })
@@ -134,18 +164,74 @@ export function WorkItemsPage() {
   const columns = useMemo<ColumnDef<WorkItemResponse>[]>(
     () => [
       {
+        id: 'select',
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllRowsSelected()
+                ? true
+                : table.getIsSomeRowsSelected()
+                  ? 'indeterminate'
+                  : false
+            }
+            onCheckedChange={(checked) => table.toggleAllRowsSelected(!!checked)}
+            aria-label="Select all rows"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(checked) => row.toggleSelected(!!checked)}
+            aria-label={`Select ${row.original.key}`}
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+        size: 32,
+      },
+      {
         id: 'key',
         accessorFn: (row) => row.number,
         header: 'Key',
-        cell: ({ row }) => (
-          <Link
-            to="/workspaces/$wsSlug/projects/$projKey/items/$number"
-            params={{ wsSlug, projKey, number: String(row.original.number) }}
-            className="font-mono hover:underline"
-          >
-            {row.original.key}
-          </Link>
-        ),
+        cell: ({ row }) => {
+          const canExpand = row.getCanExpand()
+          const isExpanded = row.getIsExpanded()
+          return (
+            <div
+              className="inline-flex items-center gap-1"
+              style={{ paddingLeft: `${row.depth * 18}px` }}
+            >
+              {canExpand ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    row.toggleExpanded()
+                  }}
+                  className="size-4 inline-flex items-center justify-center text-muted-foreground hover:text-foreground"
+                  aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                  aria-expanded={isExpanded}
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="size-3.5" />
+                  ) : (
+                    <ChevronRight className="size-3.5" />
+                  )}
+                </button>
+              ) : (
+                <span className="size-4" aria-hidden />
+              )}
+              <Link
+                to="/workspaces/$wsSlug/projects/$projKey/items/$number"
+                params={{ wsSlug, projKey, number: String(row.original.number) }}
+                className="inline-flex items-center gap-2 font-mono hover:underline"
+              >
+                <PriorityChip priority={row.original.priority} />
+                {row.original.key}
+              </Link>
+            </div>
+          )
+        },
         enableSorting: true,
       },
       {
@@ -255,16 +341,41 @@ export function WorkItemsPage() {
     [wsSlug, projKey],
   )
 
+  // The select column is always pinned leftmost — it doesn't appear in the user's
+  // saved column order, but the table needs to know to render it first.
+  const effectiveColumnOrder = useMemo(
+    () => ['select', ...columnOrder.filter((id) => id !== 'select')],
+    [columnOrder],
+  )
+
   const table = useReactTable({
-    data: itemsQuery.data ?? [],
+    data: topLevelRows,
     columns,
-    state: { sorting, columnVisibility, columnOrder },
+    state: {
+      sorting,
+      columnVisibility,
+      columnOrder: effectiveColumnOrder,
+      rowSelection,
+      expanded,
+    },
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
+    onRowSelectionChange: setRowSelection,
+    onExpandedChange: setExpanded,
+    enableRowSelection: true,
+    getRowId: (row) => row.id,
+    getSubRows: (row) => childrenByParent.get(row.key),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
   })
+
+  const selectedItems = useMemo(
+    () => table.getSelectedRowModel().rows.map((r) => r.original),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rowSelection, itemsQuery.data],
+  )
 
   const visibleColumnCount = table.getVisibleLeafColumns().length
 
@@ -359,6 +470,13 @@ export function WorkItemsPage() {
         {itemsQuery.data?.length ?? 0} item
         {itemsQuery.data?.length === 1 ? '' : 's'} in this project.
       </p>
+
+      <SelectionToolbar
+        wsSlug={wsSlug}
+        projKey={projKey}
+        selected={selectedItems}
+        onClear={() => setRowSelection({})}
+      />
     </section>
   )
 }

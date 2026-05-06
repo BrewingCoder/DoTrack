@@ -2732,6 +2732,7 @@ export interface CreateWorkItemRequest {
     reporterId: string;
     assigneeId: string | undefined;
     estimatePoints: number | undefined;
+    priority: Priority | undefined;
 
     [key: string]: any;
 }
@@ -2831,6 +2832,7 @@ export interface UpdateWorkItemRequest {
     assigneeId: string | undefined;
     estimatePoints: number | undefined;
     state: WorkItemState | undefined;
+    priority: Priority2 | undefined;
 
     [key: string]: any;
 }
@@ -2843,6 +2845,8 @@ export interface WatchRequest {
 
 export type WorkItemLinkType = "Blocks" | "Duplicates" | "Causes" | "Relates";
 
+export type WorkItemPriority = "ShowStopper" | "Critical" | "Major" | "Normal" | "Minor";
+
 export interface WorkItemResponse {
     key: string;
     number: number;
@@ -2851,11 +2855,13 @@ export interface WorkItemResponse {
     tier: WorkItemTier;
     type: Type2 | undefined;
     state: WorkItemState;
+    priority: WorkItemPriority | undefined;
     title: string;
     description: string | undefined;
     reporterId: string;
     assigneeId: string | undefined;
     estimatePoints: number | undefined;
+    parentKey: string | undefined;
     createdAt: string;
     updatedAt: string;
 
@@ -2882,12 +2888,22 @@ export interface Type {
     [key: string]: any;
 }
 
+export interface Priority {
+
+    [key: string]: any;
+}
+
 export interface State {
 
     [key: string]: any;
 }
 
 export interface State2 {
+
+    [key: string]: any;
+}
+
+export interface Priority2 {
 
     [key: string]: any;
 }
